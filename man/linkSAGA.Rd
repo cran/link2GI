@@ -4,31 +4,31 @@
 \alias{linkSAGA}
 \title{Locate and bind valid SAGA installation(s)}
 \usage{
-linkSAGA(defaultSAGA = NULL, DL = "C:", MP = "/usr", verSelect = FALSE)
+linkSAGA(default_SAGA = NULL, DL = "C:", MP = "/usr",
+  ver_select = FALSE)
 }
 \arguments{
-\item{defaultSAGA}{string contains path to SAGA binaries}
+\item{default_SAGA}{string contains path to SAGA binaries}
 
 \item{DL}{drive letter}
 
 \item{MP}{mount point}
 
-\item{verSelect}{boolean default is FALSE. If there is more than one 'SAGA GIS' installation and \code{verSelect} = TRUE the user can select interactively the preferred 'SAGA GIS' version}
+\item{ver_select}{boolean default is FALSE. If there is more than one 'SAGA GIS' installation and \code{ver_select} = TRUE the user can select interactively the preferred 'SAGA GIS' version}
 }
 \description{
-Locate and bind valid \href{http://www.saga-gis.org/}{SAGA GIS}
+Locate and bind valid \href{http://www.saga-gis.org/}{SAGA}
  installation(s). It returns the pathes and correct environment settings. All
  valid means that it looks for the \code{saga_cmd} or \code{saga_cmd.exe}
- executables. If the file is found it is assumed to be a valid
- 'SAGA GIS' installation.
+ executables. If the file is found it is assumed to be a valid 'SAGA GIS' installation.
 }
 \details{
-If called without any parameter \code{linkSAGA()} it performs a full search over \code{C:}. If it finds one or more 'SAGA GIS' binaries it will take the first hit. You have to set \code{verSelect = TRUE} for an interactive selection of the preferred version. Additionally the selected SAGA pathes are added to the environment and the global variables \code{sagaPath}, \code{sagaModPath} and \code{sagaCmd} will be created.
+If called without any parameter \code{linkSAGA()} it performs a full search over \code{C:}. If it finds one or more 'SAGA GIS' binaries it will take the first hit. You have to set \code{ver_select = TRUE} for an interactive selection of the preferred version. Additionally the selected SAGA pathes are added to the environment and the global variables \code{sagaPath}, \code{sagaModPath} and \code{sagaCmd} will be created.
 }
 \note{
 The excellent 'SAGA GIS' wrapper \href{https://CRAN.R-project.org/package=RSAGA}{RSAGA} is NOT used because the
- the developemt of 'SAGA GIS' breaks permanently the API call syntax. This fact makes it highly impracticable
- to keep with the wrapper adaptions in line. \code{RSAGA} will meet perfectly your needs if you use 'SAGA GIS' versions from 2.0.4 - 2.2.3.
+ it currently covers only 'SAGA GIS' versions from 2.0.4 - 2.2.3. The fast SAGA GIS changes makes it highly impracticable
+ to keep the wrapper adaptions in line. \code{RSAGA} will meet all linking needs perfectly if you use 'SAGA GIS' versions from 2.0.4 - 2.2.3.
 }
 \examples{
 \dontrun{
@@ -40,4 +40,3 @@ linkSAGA()
 linkSAGA(c("C:/OSGeo4W64/apps/saga","C:/OSGeo4W64/apps/saga/modules"))
 }
 }
-

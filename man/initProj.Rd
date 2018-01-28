@@ -4,11 +4,13 @@
 \alias{initProj}
 \title{Defines and creates folders and variables}
 \usage{
-initProj(projRootDir = getwd(), projFolders = c("data/", "result/", "run/",
-  "log/"))
+initProj(projRootDir = getwd(), GRASSlocation = "tmp/",
+  projFolders = c("data/", "result/", "run/", "log/"))
 }
 \arguments{
 \item{projRootDir}{project github root directory (your github name)}
+
+\item{GRASSlocation}{folder for GRASS data}
 
 \item{projFolders}{list of subfolders in project}
 }
@@ -17,4 +19,3 @@ Defines and creates (if necessary) all folders variables
 set the SAGA path variables and other system variables
 exports all variables to the global environment
 }
-

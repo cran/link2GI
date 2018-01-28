@@ -2,80 +2,121 @@
 % Please edit documentation in R/linkGRASS.R
 \name{linkGRASS7}
 \alias{linkGRASS7}
-\title{Initializes environment variables and pathes for GRASS7}
+\title{Locate and set up 'GRASS 7' API bindings}
 \usage{
-linkGRASS7(x = NULL, defaultGrass = NULL, searchPath = NULL,
-  verSelect = FALSE)
+linkGRASS7(x = NULL, default_GRASS7 = NULL, search_path = NULL,
+  ver_select = FALSE, gisdbase_exist = FALSE, gisdbase = NULL,
+  location = NULL, spatial_params = NULL, resolution = NULL)
 }
 \arguments{
 \item{x}{raster or sp object}
 
-\item{defaultGrass}{if NULL an automatic search will be performed. You may 
-also provide a valid combination as c("C:/OSGeo4W64","grass-7.0.5","osgeo4w")}
+\item{default_GRASS7}{default is \code{NULL} If is \code{NULL} an automatic search for all installed versions is performed. 
+If you provide a valid list the corresponding version is initialized. An example for OSGeo4W64 is: \code{c("C:/OSGeo4W64","grass-7.0.5","osgeo4w")}}
 
-\item{searchPath}{path or mounting point that will be searched}
+\item{search_path}{path or mounting point that will be searched}
 
-\item{verSelect}{boolean if TRUE you may choose interactively the binary version (if found  more than one),  by default FALSE}
-}
-\value{
-linkGRASS7 initializes the usage of GRASS7.
+\item{ver_select}{boolean if TRUE you may choose interactively the binary version (if found  more than one),  by default FALSE}
+
+\item{gisdbase_exist}{default is FALSE if set to TRUE the arguments gisdbase and location are expected to be an existing GRASS gisdbase}
+
+\item{gisdbase}{default is \code{NULL}, invoke \code{tempdir()} to the 'GRASS' database. Alternativeley you can provide a individual path.}
+
+\item{location}{default is \code{NULL}, invoke \code{basename(tempfile())} for defining the 'GRASS' location. Alternativeley you can provide a individual path.}
+
+\item{spatial_params}{default is \code{NULL}. Instead of a spatial object you may provide the geometry as a list. E.g. c(xmin,ymin,xmax,ymax,proj4_string)}
+
+\item{resolution}{resolution in map units for the GRASS raster cells}
 }
 \description{
-Initializes the environment and the pathes for 
-\href{https://grass.osgeo.org/}{'GRASS GIS 7.x'}  The correct linkage to 'GRASS GIS' is performed by using an existing and valid
- \code{\link{raster}} or \code{\link{sp}} object. \cr
+Initializes the session environment and the system pathes for an easy acces to 
+\href{https://grass.osgeo.org/}{'GRASS GIS 7.x'}.  The correct setup of the spatial and projection parameters is
+ automatically performed by using either an existing and valid \code{\link{raster}}, \code{\link{sp}} or \code{\link{sf}} object, 
+ or manually by providing a list containing the minimum parameters needed.\cr
 }
 \details{
-The concept is very straightforward but for an all days usage pretty 
- helpful. You need to provide a \code{\link{raster}} or \code{\link{sp}} spatial object
- which has to be correctly georeferenced. The resulting params will be used
- to initialize a temporary but static 
- \href{https://CRAN.R-project.org/package=rgrass7}{rgrass7} environment.\cr\cr
- If you want speed up the init process (mainly the search over your hard disk) you can provide a correct parameter set. Best way to do so is to call search
+The concept is straightforward but for an all days usage helpful. Either you need to 
+provide a \code{\link{raster}} or \code{\link{sp}} \code{\link{sf}} spatial object
+ which has correct spatial and projection properties or you may link directlxy to an existing 'GRASS' gisdbase and mapset. 
+ If you choose an spatial object to initialize a correct 'GRASS' mapset it is used to create either a temporary or a permanent 
+ \href{https://CRAN.R-project.org/package=rgrass7}{rgrass7} environment including the correct 'GRASS 7' structure.\cr\cr
+ The most time consuming part on 'Windows' Systems is the search process. This can easily take 10 or more minutes. 
+ To speed up this process you can also provide a correct parameter set. Best way to do so is to call \code{searchGRASSW} or for 'Linux' \code{searchGRASSX} manually. 
+ and call \code{linkGRASS7} with the version arguments of your choice. linkGRASS7 initializes the usage of GRASS7.
 }
 \note{
 'GRASS GIS 7' is excellently supported by the
  \link{rgrass7} wrapper package. Nevertheless 'GRASS GIS' is well known for
- its high demands regarding the correct workspace and environment setup. This
- becomes even worse on 'Windows' platforms or if alternative 'GRASS GIS'
- installations are available. While the setup function
- \code{initGRASS} that is  provided by the \code{\link{rgrass7}} package, works fine under Linux and for known pathes and environmental variables, one
- will find that the integration of a 'Windows' based 'GRASS GIS' especially if
- provided by 'OSGeo4W' \url{http://trac.osgeo.org/osgeo4w/} and/or the parallel
- installations of different software versions will be cumbersome. The function
- \code{linkGRASS7} tries to find all valid 'GRASS GIS' binaries by analyzing
- the startup files of 'GRASS GIS'. After identifying 'GRASS GIS' binaries all
- necessary system variables and settings will be performed.
+ its high demands regarding the correct spatial and reference setup an a bunch 
+ of workspace and environment requirements. This becomes even worse on 'Windows' 
+ platforms or if several alternative 'GRASS GIS' installations are available.
+ If one knows what to do the \code{\link{rgrass7}} package setup function \code{initGRASS} works fine under Linux. 
+ This is also valid for well known configurations under the 'Windows' operation system. 
+ Nevertheless on university lab or on company computers with restriced privileges and/or using different releases
+ like the  \href{http://trac.osgeo.org/osgeo4w/}{'OSGeo4W'} distribution and the  
+ \href{https://grass.osgeo.org/download/software/ms-windows/#stand-alone}{'GRASS 7' stand-alone} installation, 
+ or different software releases (e.g. 'GRASS 7.0.5 and GRASS 7.2.0), it becomes often cumbersome or even impossible to get the correct linkages. \cr 
+ The function \code{linkGRASS7} tries to find all valid 'GRASS GIS' binaries by analyzing
+ the startup script files of 'GRASS GIS'. After identifying the 'GRASS GIS' binaries all
+ necessary system variables and settings will be generated and passed to a temporary R enviroment.
 
-If you have more than one valid installation you will be ask to select one.
+If you have more than one valid installation and run \code{linkGRASS7()} without arguments, you will be ask to select one.
 }
 \examples{
 \dontrun{
-# get meuse data
-library(sp)
+# get meuse data as sp object
+library(link2GI)
+require(sp)
 data(meuse) 
 coordinates(meuse) <- ~x+y 
 proj4string(meuse) <-CRS("+init=epsg:28992") 
 
-# automatic search and find of GRASS binaries if 
-# more than one you have to choose. 
-linkGRASS7(meuse)
+# get meuse data as sf object
+require(sf)
+meuse_sf = st_as_sf(meuse, 
+                    coords = 
+                    c("x", "y"), 
+                    crs = 28992, 
+                    agr = "constant")
+
  
-# call if you do not have any idea if and where GRASS is installed
-# Actually this linking procedure is highly recommended
+# Automatic search and find of GRASS binaries 
+# using the meuse sp data object for spatial referencing
+# This is the highly recommended linking procedure for on the fly jobs
+# NOTE: if more than one GRASS installation is found you have to choose. 
 linkGRASS7(meuse)
 
-# assuming a typical standalone non-OSGeo4W installation
-# You must provide at  
+# Typical non-OSGeo4W installation 
+# using the meuse sp data object for spatial referencing
 linkGRASS7(meuse,c("C:/Program Files/GRASS GIS7.0.5","GRASS GIS 7.0.5","NSIS")) 
 
-# assuming a typical OSGeo4W installation
+# Typical OSGeo4W installation using the meuse sp data object for spatial referencing
 linkGRASS7(meuse,c("C:/OSGeo4W64","grass-7.0.5","osgeo4W"))
 
-# string for Linux c("/usr/bin","grass72") '
+# CREATE and link to a permanent GRASS folder at "~/temp3", location named "project1" 
+linkGRASS7(meuse_sf, gisdbase = "~/temp3",location = "project1")   
+
+# ONLY LINK to a permanent GRASS folder at "~/temp3", location named "project1" 
+linkGRASS7(gisdbase = "~/temp3",location = "project1", gisdbase_exist = TRUE )   
+
+# SELECT the GRASS installation 
+linkGRASS7(meuse_sf,ver_select = TRUE)
+
+# SELECT the GRASS installation and define the search location
+linkGRASS7(meuse_sf,ver_selecPOSIXltt = TRUE, search_path = "D:/")
+
+# setting up GRASS manually with spatial parameters of the meuse data
+proj4_string <- as.character(sp::CRS("+init=epsg:28992"))
+linkGRASS7(spatial_params = c(178605,329714,181390,333611,proj4_string)) 
+
+# creating a GRASS gisdbase manually with spatial parameters of the meuse data 
+# additionally using a peramanent directory "~/examples" and the location "meuse_spatial_params "
+proj4_string <- as.character(sp::CRS("+init=epsg:28992"))
+linkGRASS7(gisdbase = "~/examples",
+           location = "meuse_spatial_params",
+           spatial_params = c(178605,329714,181390,333611,proj4_string))
 }
 }
 \author{
 Chris Reudenbach
 }
-

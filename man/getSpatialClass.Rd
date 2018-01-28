@@ -2,7 +2,7 @@
 % Please edit documentation in R/initControls.R
 \name{getSpatialClass}
 \alias{getSpatialClass}
-\title{Checks if x is a raster or sp object}
+\title{Checks if x is of type raster,sf or sp}
 \usage{
 getSpatialClass(obj)
 }
@@ -21,4 +21,3 @@ getSpatialClass(x)
 \author{
 Chris Reudenbach
 }
-
