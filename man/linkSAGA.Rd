@@ -2,43 +2,54 @@
 % Please edit documentation in R/linkSAGA.R
 \name{linkSAGA}
 \alias{linkSAGA}
-\title{Locate and bind valid SAGA installation(s)}
+\title{Identifies SAGA GIS Installations and returns linking Informations}
 \usage{
-linkSAGA(default_SAGA = NULL, DL = "C:", MP = "/usr",
-  ver_select = FALSE)
+linkSAGA(default_SAGA = NULL, searchLocation = "default",
+  ver_select = FALSE, quiet = TRUE)
 }
 \arguments{
-\item{default_SAGA}{string contains path to SAGA binaries}
+\item{default_SAGA}{string contains path to \code{RSAGA} binaries}
 
-\item{DL}{drive letter}
-
-\item{MP}{mount point}
+\item{searchLocation}{drive letter to be searched, for Windows systems default
+is \code{C:}, for Linux systems default is \code{/usr}.}
 
 \item{ver_select}{boolean default is FALSE. If there is more than one 'SAGA GIS' installation and \code{ver_select} = TRUE the user can select interactively the preferred 'SAGA GIS' version}
+
+\item{quiet}{boolean  switch for supressing messages default is TRUE}
+}
+\value{
+a list containing the selected \code{RSAGA} path variables \code{$sagaPath},\code{$sagaModPath},\code{$sagaCmd} and potentially other installations \code{$installed}
 }
 \description{
-Locate and bind valid \href{http://www.saga-gis.org/}{SAGA}
- installation(s). It returns the pathes and correct environment settings. All
- valid means that it looks for the \code{saga_cmd} or \code{saga_cmd.exe}
- executables. If the file is found it is assumed to be a valid 'SAGA GIS' installation.
+Finds the existing \href{http://www.saga-gis.org/}{SAGA GIS} installation(s), 
+generates and sets the necessary path and system variables for a seamless use of the command 
+line calls of the 'SAGA GIS' CLI API, setup valid system variables for calling a default 
+\code{\link{rsaga.env}} and by this makes available the \code{\link{RSAGA-package}} wrapper functions.\cr
+All existing installation(s) means that it looks for the \code{saga_cmd} or \code{saga_cmd.exe} 
+executables. If the file is found it is assumed to be a valid 'SAGA GIS' installation.
 }
 \details{
 If called without any parameter \code{linkSAGA()} it performs a full search over \code{C:}. If it finds one or more 'SAGA GIS' binaries it will take the first hit. You have to set \code{ver_select = TRUE} for an interactive selection of the preferred version. Additionally the selected SAGA pathes are added to the environment and the global variables \code{sagaPath}, \code{sagaModPath} and \code{sagaCmd} will be created.
 }
 \note{
-The excellent 'SAGA GIS' wrapper \href{https://CRAN.R-project.org/package=RSAGA}{RSAGA} is NOT used because the
- it currently covers only 'SAGA GIS' versions from 2.0.4 - 2.2.3. The fast SAGA GIS changes makes it highly impracticable
- to keep the wrapper adaptions in line. \code{RSAGA} will meet all linking needs perfectly if you use 'SAGA GIS' versions from 2.0.4 - 2.2.3.
+The excellent 'SAGA GIS' wrapper \href{https://CRAN.R-project.org/package=RSAGA}{RSAGA} 
+is in line for a major update however it covers currently (Feb 2018) only 'SAGA GIS' 
+versions from 2.0.4 - 2.2.3. The fast evolution of 'SAGA GIS' makes it highly impracticable
+to keep the wrapper adaptions in line. \code{RSAGA} will meet all linking needs perfectly if 
+you use 'SAGA GIS' versions from 2.0.4 - 2.2.3.
 }
 \examples{
 \dontrun{
 
 # call if you do not have any idea if and where SAGA GIS is installed
+# it will return a list with the selected and available SAGA installations
+# it prepares the system for running the selected SAGA version via RSAGA or CLI
 linkSAGA()
 
 # typical OSGeo4W64 installation 
-linkSAGA(c("C:/OSGeo4W64/apps/saga","C:/OSGeo4W64/apps/saga/modules"))
-# setting the environment using RSAGA
-RSAGA::rsaga.env(path = sagaPath, modules = sagaModPath)
+saga <- linkSAGA(c("C:/OSGeo4W64/apps/saga","C:/OSGeo4W64/apps/saga/modules"))
+# overriding the default environment using RSAGA and assuming you have 3 SAGA installations
+saga<-linkSAGA()
+RSAGA::rsaga.env(path = saga$installed$binDir[3],modules = saga$installed$moduleDir[3])
 }
 }
