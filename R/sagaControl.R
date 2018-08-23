@@ -3,7 +3,7 @@
 #'@name searchSAGAX
 #'@description  Search for valid 'GRASS GIS' installations at a given 'Linux' mount point
 #'@param MP default mount point is \code{/usr}
-#'@param quiet boolean  switch for supressing messages default is TRUE
+#'@param quiet boolean  switch for supressing console messages default is TRUE
 #'@return A dataframe contasining the 'SAGA GIS' root folder(s), the version name(s) and the installation type(s)
 #'@author Chris Reudenbach
 #'@keywords internal
@@ -135,7 +135,7 @@ searchSAGAW <- function(DL = "C:",
 #'installations by analysing the calling batch scripts.
 #'@param searchLocation drive letter to be searched, for Windows systems default
 #' is \code{C:}, for Linux systems default is \code{/usr}.
-#'@param quiet boolean  switch for supressing messages default is TRUE
+#'@param quiet boolean  switch for supressing console messages default is TRUE
 
 #'@return A dataframe with the 'SAGA GIS' root folder(s), version name(s) and 
 #'installation type code(s)
@@ -162,4 +162,25 @@ findSAGA <- function(searchLocation = "default",
     else link = link2GI::searchSAGAX(MP = searchLocation,quiet = quiet)
   }
   return(link)
+}
+
+getrowSagaVer<- function (paths){
+  #tmp<-c()
+  scmd = ifelse(Sys.info()["sysname"]=="Windows", "saga_cmd.exe", "saga_cmd")
+  sep = ifelse(Sys.info()["sysname"]=="Windows", "\\", "/")
+  highestVer<-"2.0.8"
+  for (i in 1:nrow(paths)){
+  tmp<-  strsplit(x = system(paste0(paste0(shQuote(paths$binDir[i]),sep,scmd)," --version"),intern = TRUE),split = "SAGA Version: ")[[1]][2]
+  highestVer <- max(tmp,highestVer)
+  pathI <- i
+  }
+  return (pathI)
+}
+
+
+getSagaVer<- function (paths){
+  sep = ifelse(Sys.info()["sysname"]=="Windows", "\\", "/")
+  scmd = ifelse(Sys.info()["sysname"]=="Windows", "saga_cmd.exe", "saga_cmd")
+  sagaVersion<-  strsplit(x = system(paste0(paste0(shQuote(paths),sep,scmd)," --version"),intern = TRUE),split = "SAGA Version: ")[[1]][2]
+  return (sagaVersion)
 }

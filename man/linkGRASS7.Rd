@@ -7,7 +7,7 @@
 linkGRASS7(x = NULL, default_GRASS7 = NULL, search_path = NULL,
   ver_select = FALSE, gisdbase_exist = FALSE, gisdbase = NULL,
   location = NULL, spatial_params = NULL, resolution = NULL,
-  quiet = FALSE)
+  quiet = TRUE, returnPaths = FALSE)
 }
 \arguments{
 \item{x}{raster or sp object}
@@ -29,7 +29,10 @@ If you provide a valid list the corresponding version is initialized. An example
 
 \item{resolution}{resolution in map units for the GRASS raster cells}
 
-\item{quiet}{boolean if set to FALSE you will get most of the console messages}
+\item{quiet}{boolean  switch for supressing console messages default is TRUE}
+
+\item{returnPaths}{boolean if set to FALSE the pathes of the selected version are written 
+to the PATH variable only, otherwise all paths and versions of the installed GRASS versions ae returned.}
 }
 \description{
 Initializes the session environment and the system pathes for an easy acces to 
@@ -117,7 +120,7 @@ linkGRASS7(spatial_params = c(178605,329714,181390,333611,proj4_string))
 # creating a GRASS gisdbase manually with spatial parameters of the meuse data 
 # additionally using a peramanent directory "~/examples" and the location "meuse_spatial_params "
 proj4_string <- as.character(sp::CRS("+init=epsg:28992"))
-linkGRASS7(gisdbase = "~/examples",
+linkGRASS7(gisdbase = paste0(tempdir(),"~/examples"),
            location = "meuse_spatial_params",
            spatial_params = c(178605,329714,181390,333611,proj4_string))
 }

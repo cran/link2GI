@@ -1,5 +1,5 @@
 
-#'@title  Initializes and set up  access to the 'OTB' command line interface
+#'@title  Usually for internally usage, initializes and set up  access to the 'OTB' command line interface
 #'@name setenvOTB
 #'@description  Initializes and set up  access to the 'OTB' command line interface
 #'  
@@ -41,7 +41,7 @@ setenvOTB <- function(bin_OTB = NULL, root_OTB = NULL){
 #'@name searchOTBW
 #'@description  Search for valid 'OTB' installations on a 'Windows' OS
 #'@param DL drive letter default is "C:"
-#'@param quiet boolean  switch for supressing messages default is TRUE
+#'@param quiet boolean  switch for supressing console messages default is TRUE
 #'@return A dataframe with the 'OTB' root folder(s) the version name(s) and the installation type(s).
 #'@author Chris Reudenbach
 #'@export searchOTBW
@@ -49,8 +49,6 @@ setenvOTB <- function(bin_OTB = NULL, root_OTB = NULL){
 #'
 #'@examples
 #' \dontrun{
-#'#### Examples how to use RSAGA and OTB bindings from R
-#'
 #' # get all valid OTB installation folders and params
 #' searchOTBW()
 #' }
@@ -127,8 +125,6 @@ searchOTBW <- function(DL = "C:",
 #'
 #'@examples
 #' \dontrun{
-#'#### Examples how to use RSAGA and OTB bindings from R
-#'
 #' # get all valid OTB installation folders and params
 #' searchOTBX()
 #' }
@@ -165,7 +161,7 @@ searchOTBX <- function(MP = "/usr",
 #'installations by analysing the calling batch scripts.
 #'@param searchLocation drive letter to be searched, for Windows systems default
 #' is \code{C:}, for Linux systems default is \code{/usr}.
-#'@param quiet boolean  switch for supressing messages default is TRUE
+#'@param quiet boolean  switch for supressing console messages default is TRUE
 #'@return A dataframe with the 'OTB' root folder(s),  and command line executable(s)
 #'@author Chris Reudenbach
 #'@export findOTB
