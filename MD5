@@ -1,9 +1,9 @@
-a94a504acb7586fec1a1fbaf7697cb57 *DESCRIPTION
+bc49e9b56add279b517e595917ca2b99 *DESCRIPTION
 84dcc94da3adb52b53ae4fa38fe49e5d *LICENSE
 02894a9abaa043afcf49d451f2520351 *NAMESPACE
-b839fd4427321a095ca16f7795bba296 *NEWS
-b839fd4427321a095ca16f7795bba296 *NEWS.md
-23af702ac68b0851d456893518d307ee *R/grass7Control.R
+f6f721d584fb877dcf137c3b1bc316de *NEWS
+f6f721d584fb877dcf137c3b1bc316de *NEWS.md
+179a35559088fc8e16441347acaa2ed6 *R/grass7Control.R
 96f10073940ac0d467632cfaf212358f *R/initProj.R
 89540e79190bf455adfe33afec045f5e *R/link2GI-package.R
 6bcfc18df9d039495d1d97f049612eba *R/link2giKarim.R
@@ -12,14 +12,14 @@ d070f42665aa7da385dfda38a40c1179 *R/linkGDAL.R
 7aed5fd413309293d4f7309ae911f7ce *R/linkOTB.R
 48adf996bc05de5ed39e344dd1ff7889 *R/linkSAGA.R
 a64e4b0b80c530b87bbc64f8fc8d1ce8 *R/otbControls.R
-2543fd5cbf99c5822e6d9da560c3411d *R/parseOTB.R
+3732b2ba6a19178a6eaf60a9f07df488 *R/parseOTB.R
 3c49bff5e937bb8fc397645f27ad40c8 *R/sagaControl.R
 17107d3e7e65378cce1706f1d66616bf *R/usefulStuff.R
 e2991fb66ebd359a6f559c9d9dec353a *README.md
 31f6f0ee74d9c98f9cf4a918f9324c23 *build/vignette.rds
-dedf51a5c4982bc4bdcb1c19067484b5 *inst/doc/link2GI1.R
-7cd7de3816799b7c88c7911c88e87291 *inst/doc/link2GI1.Rmd
-84ff2f36cfeeb88b8ad3ecc45b948770 *inst/doc/link2GI1.html
+f735c9a47f287cbca0f73839bc687235 *inst/doc/link2GI1.R
+365183d87581c931bbf670848762d57d *inst/doc/link2GI1.Rmd
+31660bed0f1c9a27d5e9527f3162df15 *inst/doc/link2GI1.html
 41c3cc2053aa7e78d79d0577be7dc893 *man/add2Path.Rd
 3664f2be765ecc3081bb25902c472ee6 *man/checkPCDomain.Rd
 aa516badd2fac0b3bcb89bb26ad22a71 *man/findGRASS.Rd
@@ -37,7 +37,7 @@ f031663c5b37d25100518f9e03151dba *man/linkGRASS7.Rd
 ad7e723facf736782faec61c444ef8aa *man/paramGRASSw.Rd
 01d007e86326ef97478dd5002d7168c5 *man/paramGRASSx.Rd
 7c9f23c3459fc4b333e4a4e3907772a3 *man/parseOTBAlgorithms.Rd
-611c5952922758ca11b5e03fbf29bb4d *man/parseOTBFunction.Rd
+5ac68cf9f9719fb16802f90ef38c8a2b *man/parseOTBFunction.Rd
 e54692dbfbbf5a380fb88c55fffd106d *man/searchGRASSW.Rd
 bb031daf40aef6e9f96f8db90d5e894f *man/searchGRASSX.Rd
 54a655230483d0046a9472e7e2522084 *man/searchOTBW.Rd
@@ -47,4 +47,4 @@ b1a39a8b2cee59aba5bce9bdc5d9cbb3 *man/searchOTBX.Rd
 7f5ebf5cdb3af99937a3da9f1d633d9b *man/setenvGRASSw.Rd
 9de9e0c012a8a02198f91b4a0bbc7a9c *man/setenvOTB.Rd
 68e7bad1ba05394de5bcbd4d8c873ecb *man/sf2gvec.Rd
-7cd7de3816799b7c88c7911c88e87291 *vignettes/link2GI1.Rmd
+365183d87581c931bbf670848762d57d *vignettes/link2GI1.Rmd
