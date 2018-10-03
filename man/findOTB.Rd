@@ -21,13 +21,6 @@ on your 'Windows' system. There is a major difference between osgeo4W and
 stand_alone installations. The functions trys to find all valid 
 installations by analysing the calling batch scripts.
 }
-\examples{
-\dontrun{
-# find recursively all existing 'Orfeo Toolbox' installations folders starting 
-# at the default search location
-findOTB()
-}
-}
 \author{
 Chris Reudenbach
 }

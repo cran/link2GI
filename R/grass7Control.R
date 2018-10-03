@@ -1,4 +1,91 @@
+#'@title Usually for internally usage, get 'GRASS GIS' and \code{rgrass7} parameters on 'Linux' OS
+#'@name paramGRASSx
+#'@description Initialize and set up \link{rgrass7}  for 'Linux'
+#'@details During the rsession you will have full access to GRASS7 GIS via the \link{rgrass7} wrappe. Additionally you may use also use the API calls of GRASS7 via the command line.
+#'@param set_default_GRASS7 default = NULL will force a search for 'GRASS GIS' You may provide a valid combination as 
+#'                                    c("/usr/lib/grass74","7.4.1","grass74")
+#'@param MP mount point to be searched. default is "usr"
+#'@param quiet boolean  switch for supressing console messages default is TRUE
+#'@param ver_select if TRUE you must interactivley selcect between alternative installations
+#'@export paramGRASSx
+#'
+#'@examples
+#' \dontrun{
+#' # automatic retrieval of the GRASS7 enviroment settings
+#' paramGRASSx()
+#' 
+#' 
+#' # typical stand_alone installation
+#' paramGRASSx("/usr/bin/grass72")
+#' 
+#' # typical user defined installation (compiled sources)
+#' paramGRASSx("/usr/local/bin/grass72")
+#' }
 
+paramGRASSx <- function(set_default_GRASS7=NULL, 
+                        MP = "/usr",
+                        ver_select = FALSE, 
+                        quiet =TRUE){
+  if (ver_select =='T') ver_select <- TRUE
+  if (ver_select == "F" && !is.numeric(ver_select)) ver_select <- FALSE
+  if (Sys.info()["sysname"]=="Windows") return(cat("You are running Windows - Please choose a suitable searchLocation argument that MUST include a Windows drive letter and colon"))
+  # iF WE KNOW NOTHING ABOUT grass PATHES WE HAVE TO SEARCH
+  if (is.null(set_default_GRASS7 )) {
+    # SEARCH FOR INSTALLATIONS
+    params_GRASS <- findGRASS(searchLocation = MP)
+  }
+  # if e know  already something it has to be provided in set_default_GRASS7
+  else {   
+    params_GRASS <- rbind.data.frame(set_default_GRASS7)
+    names(params_GRASS)<-c("instDir","version","installation_type")
+    }
+  
+  # choosing the desired installation depending on the ver_select options 
+  if (params_GRASS[[1]][1] != FALSE) {
+  # if only one take it  
+  if (nrow(params_GRASS) == 1) {  
+    gisbase_GRASS <- as.character(params_GRASS$instDir)
+    
+    # if more than one valid installation and verselect is a valid number:
+    # take the one as defined by ver_select
+  } else if (nrow(params_GRASS) > 1 & is.numeric(ver_select) & (ver_select > 0 & ver_select <= nrow(params_GRASS))) {
+    if (!quiet) {
+      cat("You have more than one valid GRASS version installed!\n")
+      print(params_GRASS)
+      cat("Selected version is: ",ver_select,"\n")}
+    gisbase_GRASS <- params_GRASS$instDir[[ver_select]]
+  }
+  # if ver_selct is FALSE take the one with the highest version number
+  else if (nrow(params_GRASS) > 1 & !ver_select ) {
+    if (!quiet) {
+      cat("You have more than one valid GRASS version installed!\n")
+      cat("The latest installed version (",which(params_GRASS$version == max(params_GRASS$version)),")has been selected \n")
+      print(params_GRASS)
+      cat("\n")}
+    gisbase_GRASS <- params_GRASS$instDir[[which(params_GRASS$version == max(params_GRASS$version))]]
+  }
+  # if ver_select is TRUE manually select a version
+  else if (nrow(params_GRASS) > 1 & ver_select ) {
+    cat("You have more than one valid GRASS version installed!\n")
+    print(params_GRASS)
+    cat("\n")
+    ver <- as.numeric(readline(prompt = "Please select one:  "))
+    gisbase_GRASS <- params_GRASS$instDir[[ver]]
+  }
+  
+  # if a set_default_GRASS7 was provided take this 
+  #} 
+  # else {
+  #   gisbase_GRASS <- set_default_GRASS7
+  # }
+  grass<-list()
+  grass$gisbase_GRASS<-gisbase_GRASS
+  grass$installed <- params_GRASS
+  } else {grass <-FALSE}
+  return(grass)
+  
+  #return(gisbase_GRASS)
+}
 #'@title Usually for internally usage get 'GRASS GIS' and \code{rgrass7} parameters on 'Windows' OS
 #'@name paramGRASSw
 #'@description Initialize the enviroment variables on a 'Windows' OS for using 
@@ -10,17 +97,17 @@
 #'@param DL raster or sp object
 #'@param ver_select boolean default is FALSE. If there is more than one 'SAGA GIS' installation and \code{ver_select} = TRUE the user can select interactively the preferred 'SAGA GIS' version 
 #'@param set_default_GRASS7 default = NULL forces a full search for 'GRASS GIS' binaries. You may
-#'  alternatively provide a vector containing pathes and keywords. c("C:/OSGeo4W64","grass-7.0.5","osgeo4W") is valid for a typical osgeo4w installation.
+#'  alternatively provide a vector containing pathes and keywords. c("C:/OSGeo4W64","grass-7.0.5","osgeo4w") is valid for a typical osgeo4w installation.
 #'  
 #'@param quiet boolean  switch for supressing console messages default is TRUE
 #'@export paramGRASSw
 #'  
 #'@examples
-#' \dontrun{
+#' \dontrun{ 
 #' # automatic retrieval of valid 'GRASS GIS' environment settings 
 #' # if more than one is found the user has to choose.
 #' paramGRASSw()
-#' 
+#'
 #' # typical OSGeo4W64 installation
 #' paramGRASSw(c("C:/OSGeo4W64","grass-7.0.5","osgeo4W"))
 #' }
@@ -28,83 +115,94 @@
 paramGRASSw <- function(set_default_GRASS7=NULL, 
                         DL="C:", 
                         ver_select =FALSE,
-                        quiet = TRUE){
+                        quiet = TRUE) {
   if (ver_select =='T') ver_select <- TRUE
   if (ver_select == "F" && !is.numeric(ver_select)) ver_select <- FALSE
+  if (Sys.info()["sysname"]=="Linux") return(cat("You are running Linux - please choose a suitable searchLocation argument"))
   # (R) set pathes  of 'GRASS' binaries depending on 'WINDOWS'
   if (is.null(set_default_GRASS7)) {
     if (DL=="default" || is.null(DL)) DL <- "C:"
     # if no path is provided  we have to search
     params_GRASS <- findGRASS(searchLocation = DL,
                               quiet = quiet)
+  }   
+  # if e know  already something it has to be provided in set_default_GRASS7
+  else {   
+    params_GRASS <- rbind.data.frame(set_default_GRASS7)
+    names(params_GRASS)<-c("instDir","version","installation_type")
+  }
+  if (params_GRASS[[1]][1] != FALSE) {
+  # if just one valid installation was found take it
+  if (nrow(params_GRASS) == 1) {  
+    gisbase_GRASS <- setenvGRASSw(root_GRASS = params_GRASS$instDir[[1]],
+                                  grass_version = params_GRASS$version[[1]], 
+                                  installation_type = params_GRASS$installation_type[[1]],
+                                  quiet = quiet )
+    grass_version = params_GRASS$version[[1]]
+    installation_type = params_GRASS$installation_type[[1]]
     
-    # if just one valid installation was found take it
-    if (nrow(params_GRASS) == 1) {  
-      gisbase_GRASS <- setenvGRASSw(root_GRASS = params_GRASS$instDir[[1]],
-                                    grass_version = params_GRASS$version[[1]], 
-                                    installation_type = params_GRASS$installation_type[[1]],
-                                    quiet = quiet )
-      grass_version = params_GRASS$version[[1]]
-      installation_type = params_GRASS$installation_type[[1]]
-      
-      # if more than one valid installation was found you have to choose 
-    } else if (nrow(params_GRASS) > 1 & ver_select) {
-      cat("You have more than one valid GRASS GIS version\n")
-      print(params_GRASS)
-      cat("\n")
-      ver <- as.numeric(readline(prompt = "Please select one:  "))
-      gisbase_GRASS <- normalizePath(setenvGRASSw(root_GRASS = params_GRASS$instDir[[ver]],
-                                                  grass_version = params_GRASS$version[[ver]], 
-                                                  installation_type = params_GRASS$installation_type[[ver]],
-                                                  quiet = quiet  ),
-                                     winslash = "/")
-      grass_version = params_GRASS$version[[ver]]
-      installation_type = params_GRASS$installation_type[[ver]]
-    }   else if (nrow(params_GRASS) > 1 & is.numeric(ver_select) & ver_select > 0 ) {
+    # if more than one valid installation was found you have to choose 
+  } else if (nrow(params_GRASS) > 1 & is.numeric(ver_select) & (ver_select > 0 & ver_select <= nrow(params_GRASS))){
+    if (!quiet) {
       cat("You have more than one valid GRASS GIS version\n")
       print(params_GRASS)
       cat("You have selected version: ",ver_select,"\n")
-      
-      gisbase_GRASS <- normalizePath(setenvGRASSw(root_GRASS = params_GRASS$instDir[[ver_select]],
-                                                  grass_version = params_GRASS$version[[ver_select]], 
-                                                  installation_type = params_GRASS$installation_type[[ver_select]],
-                                                  quiet = quiet  ),
-                                     winslash = "/")
-      grass_version = params_GRASS$version[[ver_select]]
-      installation_type = params_GRASS$installation_type[[ver_select]]
-    } else if (nrow(params_GRASS) > 1 & !ver_select) {  
+    }
+    gisbase_GRASS <- normalizePath(setenvGRASSw(root_GRASS = params_GRASS$instDir[[ver_select]],
+                                                grass_version = params_GRASS$version[[ver_select]], 
+                                                installation_type = params_GRASS$installation_type[[ver_select]],
+                                                quiet = quiet  ),
+                                   winslash = "/")
+    grass_version = params_GRASS$version[[ver_select]]
+    installation_type = params_GRASS$installation_type[[ver_select]]
+    # if ver_selct is FALSE take the one with the highest version number
+  } else if (nrow(params_GRASS) > 1 & !ver_select) {  
+    if (!quiet) {
       cat("You have more than one valid GRASS version installed!\n")
       cat("The latest installed version (",which(params_GRASS$version == max(params_GRASS$version)),")has been selected \n")
-      
-      gisbase_GRASS <- setenvGRASSw(root_GRASS = params_GRASS$instDir[[which(params_GRASS$version == max(params_GRASS$version))]],
-                                    grass_version = params_GRASS$version[[which(params_GRASS$version == max(params_GRASS$version))]], 
-                                    installation_type = params_GRASS$installation_type[[which(params_GRASS$version == max(params_GRASS$version))]] ,
-                                    quiet=quiet)
-      grass_version = params_GRASS$version[[which(params_GRASS$version == max(params_GRASS$version))]]
-      installation_type = params_GRASS$installation_type[[which(params_GRASS$version == max(params_GRASS$version))]]
-      
-      
     }
+    gisbase_GRASS <- setenvGRASSw(root_GRASS = params_GRASS$instDir[[which(params_GRASS$version == max(params_GRASS$version))]],
+                                  grass_version = params_GRASS$version[[which(params_GRASS$version == max(params_GRASS$version))]], 
+                                  installation_type = params_GRASS$installation_type[[which(params_GRASS$version == max(params_GRASS$version))]] ,
+                                  quiet=quiet)
+    grass_version = params_GRASS$version[[which(params_GRASS$version == max(params_GRASS$version))]]
+    installation_type = params_GRASS$installation_type[[which(params_GRASS$version == max(params_GRASS$version))]]
+    # if ver_selct is true  one has to select
+  } else if (nrow(params_GRASS) > 1 & ver_select) {
+    cat("You have more than one valid GRASS GIS version\n")
+    print(params_GRASS)
+    cat("\n")
+    ver <- as.numeric(readline(prompt = "Please select one:  "))
+    gisbase_GRASS <- normalizePath(setenvGRASSw(root_GRASS = params_GRASS$instDir[[ver]],
+                                                grass_version = params_GRASS$version[[ver]], 
+                                                installation_type = params_GRASS$installation_type[[ver]],
+                                                quiet = quiet  ),
+                                   winslash = "/")
+    grass_version = params_GRASS$version[[ver]]
+    installation_type = params_GRASS$installation_type[[ver]]
+  }   
     
     # if a set_default_GRASS7 was provided take this 
-  } else {
-    gisbase_GRASS <- setenvGRASSw(root_GRASS = set_default_GRASS7[1],
-                                  grass_version = set_default_GRASS7[2], 
-                                  installation_type = set_default_GRASS7[3],
-                                  quiet =quiet)  
-    grass_version = set_default_GRASS7[2]
-    installation_type = set_default_GRASS7[3]
-    params_GRASS<- data.frame(instDir = gisbase_GRASS, 
-                              version = grass_version, 
-                              installation_type = installation_type,
-                              stringsAsFactors = FALSE)
-    
-  }
+ # } 
+ # else {
+ #    gisbase_GRASS <- setenvGRASSw(root_GRASS = set_default_GRASS7[1],
+ #                                  grass_version = set_default_GRASS7[2], 
+ #                                  installation_type = set_default_GRASS7[3],
+ #                                  quiet =quiet)  
+ #    grass_version = set_default_GRASS7[2]
+ #    installation_type = set_default_GRASS7[3]
+ #    params_GRASS<- data.frame(instDir = gisbase_GRASS, 
+ #                              version = grass_version, 
+ #                              installation_type = installation_type,
+ #                              stringsAsFactors = FALSE)
+ #    
+ #  }
   grass<-list()
   grass$gisbase_GRASS<-gisbase_GRASS
   grass$version <- grass_version
   grass$type <- installation_type
   grass$installed <- params_GRASS
+  } else {grass <-FALSE}
   return(grass)
 }
 
@@ -135,11 +233,20 @@ searchGRASSW <- function(DL = "C:",
   # recursive dir for grass*.bat returns all version of grass bat files
   if (!quiet) cat("\nsearching for GRASS installations - this may take a while\n")
   if (!quiet) cat("For providing the path manually see ?searchGRASSW \n")
-  raw_GRASS <- try(system(paste0("cmd.exe /c dir /B /S ", DL, "\\grass*.bat"), intern = T))
+  options(show.error.messages = FALSE)
   options(warn=-1)
-  if(grepl(raw_GRASS,pattern = "Datei nicht gefunden") || grepl(raw_GRASS,pattern = "File not found")) 
-    {stop("\n ********* No GRASS installation found ************\n")}
+
+  raw_GRASS <- try(system(paste0("cmd.exe /c dir /B /S ", DL, "\\grass*.bat"), intern = TRUE,ignore.stderr = TRUE))
+
+
+   if (grepl(raw_GRASS,pattern = "File not found") | grepl(raw_GRASS,pattern = "Datei nicht gefunden")) {
+
+     class(raw_GRASS) <- c("try-error", class(raw_GRASS))
+   }
+  options(show.error.messages = TRUE)
   options(warn=0)
+  
+  if(!class(raw_GRASS)[1] == "try-error") {
   # trys to identify valid grass installation(s) & version number(s)
   installations_GRASS <- lapply(seq(length(raw_GRASS)), function(i){
     # convert codetable according to cmd.exe using type
@@ -206,88 +313,22 @@ searchGRASSW <- function(DL = "C:",
   
   # bind the df lines
   installations_GRASS <- do.call("rbind", installations_GRASS)
-  
   return(installations_GRASS)
-}
-
-#'@title Usually for internally usage, get 'GRASS GIS' and \code{rgrass7} parameters on 'Linux' OS
-#'@name paramGRASSx
-#'@description Initialize and set up \link{rgrass7}  for 'Linux'
-#'@details During the rsession you will have full access to GRASS7 GIS via the \link{rgrass7} wrappe. Additionally you may use also use the API calls of GRASS7 via the command line.
-#'@param set_default_GRASS7 default = NULL will force a search for 'GRASS GIS' You may provide a valid combination as c("C:/OSGeo4W64","grass-7.0.5","osgeo4w")
-#'@param MP mount point to be searched. default is "usr"
-#'@param quiet boolean  switch for supressing console messages default is TRUE
-#'@param ver_select if TRUE you must interactivley selcect between alternative installations
-#'@export paramGRASSx
-#'
-#'@examples
-#' \dontrun{
-#' # automatic retrieval of the GRASS7 enviroment settings
-#' paramsGRASSx()
-#' 
-#' # typical stand_alone installation
-#' paramGRASSx("/usr/bin/grass72")
-#' 
-#' # typical user defined installation (compiled sources)
-#' paramGRASSx("/usr/local/bin/grass72")
-#' }
-
-paramGRASSx <- function(set_default_GRASS7=NULL, 
-                        MP = "/usr",
-                        ver_select = FALSE, 
-                        quiet =TRUE){
-  if (ver_select =='T') ver_select <- TRUE
-  if (ver_select == "F" && !is.numeric(ver_select)) ver_select <- FALSE
-  # (R) set pathes  of 'GRASS' binaries depending on 'Windows' OS
-  if (is.null(set_default_GRASS7)) {
-    
-    # if no path is provided  we have to search
-    params_GRASS <- findGRASS(searchLocation = MP)
-    
-    # if just one valid installation was found take it
-    if (nrow(params_GRASS) == 1) {  
-      gisbase_GRASS <- params_GRASS$instDir
-      
-      # if more than one valid installation was found you have to choose 
-    } else if (nrow(params_GRASS) > 1 & is.numeric(ver_select) & ver_select > 0 ) {
-      cat("You have more than one valid GRASS version installed!\n")
-      print(params_GRASS)
-      cat("You have selected version: ",ver_select,"\n")
-      gisbase_GRASS <- params_GRASS$instDir[[ver_select]]
-    }
-    
-    else if (nrow(params_GRASS) > 1 & !ver_select ) {
-      cat("You have more than one valid GRASS version installed!\n")
-      cat("The latest installed version (",which(params_GRASS$version == max(params_GRASS$version)),")has been selected \n")
-      print(params_GRASS)
-      cat("\n")
-     gisbase_GRASS <- params_GRASS$instDir[[which(params_GRASS$version == max(params_GRASS$version))]]
-    }
-    else if (nrow(params_GRASS) > 1 & ver_select ) {
-      cat("You have more than one valid GRASS version installed!\n")
-      print(params_GRASS)
-      cat("\n")
-      ver <- as.numeric(readline(prompt = "Please select one:  "))
-      gisbase_GRASS <- params_GRASS$instDir[[ver]]
-    }
-    
-    # if a set_default_GRASS7 was provided take this 
   } else {
-    gisbase_GRASS <- set_default_GRASS7
-  }
-  grass<-list()
-  grass$gisbase_GRASS<-gisbase_GRASS
-  grass$installed <- params_GRASS
-  return(grass)
+  if(!quiet) cat("Did not find any valid GRASS installation at mount point",DL)
+  return(installations_GRASS <- FALSE)}
   
-  #return(gisbase_GRASS)
 }
+
+
 
 #'@title Search recursivly valid 'GRASS GIS' installation(s) at a given 'Linux' mount point
 #'@name searchGRASSX
 #'@description Search for valid 'GRASS GIS' installations at a given 'Linux' mount point
 #'@param MP default is /usr
 #'@return A dataframe containing 'GRASS GIS' binary folder(s), version name(s) and installation type code(s)
+#'@param quiet boolean  switch for supressing console messages default is TRUEs
+
 #'@author Chris Reudenbach
 #'@export searchGRASSX
 #'@keywords internal
@@ -301,15 +342,16 @@ paramGRASSx <- function(set_default_GRASS7=NULL,
 #' searchGRASSX("~/")
 #' }
 
-searchGRASSX <- function(MP = "/usr"){
+searchGRASSX <- function(MP = "/usr",quiet =TRUE){
   if (MP=="default") MP <- "/usr"
-  raw_GRASS <- system2("find", paste(MP," ! -readable -prune -o -type f -executable -iname 'grass??' -print"),stdout = TRUE)
+  raw_GRASS <- system2("find", paste(MP," ! -readable -prune -o -type f -executable -iname 'grass??' -print"),stdout = TRUE,stderr = FALSE)
+  
   #cat(raw_GRASS)
   if (length(raw_GRASS) > 0) {
     installations_GRASS <- lapply(seq(length(raw_GRASS)), function(i){
       # grep line containing GISBASE and extract the substring 
       root_dir <- try(grep(readLines(raw_GRASS[[i]]),pattern = 'gisbase = "',value = TRUE),silent = TRUE)
-      if(!class(root_dir) == "try-error" && length(root_dir) > 0) {
+      if(!class(root_dir)[1] == "try-error" ) {
         #print(root_dir)
         root_dir <- substr(root_dir, gregexpr(pattern = '"', root_dir)[[1]][1] + 1, nchar(root_dir) - 1)
         ver_char <- grep(readLines(raw_GRASS[[i]]),pattern = 'grass_version = "',value = TRUE)
@@ -327,8 +369,8 @@ searchGRASSX <- function(MP = "/usr"){
     installations_GRASS <- do.call("rbind", installations_GRASS)
     return(installations_GRASS)
   } else {
-    warning(paste("Did not find any valid GRASS installation at mount point",MP))
-    return(installations_GRASS <- NULL)
+    if(!quiet) cat("Did not find any valid GRASS installation at mount point",MP)
+    return(installations_GRASS <- FALSE)
   }
 }
 
@@ -488,10 +530,10 @@ findGRASS <- function(searchLocation = "default",
     if (searchLocation=="default") searchLocation <- "C:"
     if (searchLocation %in% paste0(LETTERS,":") )
     link = link2GI::searchGRASSW(DL = searchLocation)  
-    else stop("You are running Windows - Please choose a suitable searchLocation argument that MUST include a Windows drive letter and colon" )
+    else return(cat("You are running Windows - Please choose a suitable searchLocation argument that MUST include a Windows drive letter and colon"))
   } else {
     if (searchLocation=="default") searchLocation <- "/usr"
-    if (grepl(searchLocation,pattern = ":"))  stop("You are running Linux - please choose a suitable searchLocation argument" )
+    if (grepl(searchLocation,pattern = ":"))  return(cat("You are running Linux - please choose a suitable searchLocation argument"))
     else link = link2GI::searchGRASSX(MP = searchLocation)
   }
   return(link)

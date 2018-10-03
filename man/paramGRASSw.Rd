@@ -9,7 +9,7 @@ paramGRASSw(set_default_GRASS7 = NULL, DL = "C:", ver_select = FALSE,
 }
 \arguments{
 \item{set_default_GRASS7}{default = NULL forces a full search for 'GRASS GIS' binaries. You may
-alternatively provide a vector containing pathes and keywords. c("C:/OSGeo4W64","grass-7.0.5","osgeo4W") is valid for a typical osgeo4w installation.}
+alternatively provide a vector containing pathes and keywords. c("C:/OSGeo4W64","grass-7.0.5","osgeo4w") is valid for a typical osgeo4w installation.}
 
 \item{DL}{raster or sp object}
 
@@ -28,7 +28,7 @@ The concept is very straightforward but for an all days usage pretty
  GRASS7 both via the wrapper package as well as the command line. paramGRASSw initializes the usage of GRASS7.
 }
 \examples{
-\dontrun{
+\dontrun{ 
 # automatic retrieval of valid 'GRASS GIS' environment settings 
 # if more than one is found the user has to choose.
 paramGRASSw()

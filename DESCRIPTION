@@ -2,8 +2,8 @@ Package: link2GI
 Type: Package
 Title: Linking Geographic Information Systems, Remote Sensing and Other
         Command Line Tools
-Version: 0.3-3
-Date: 2018-9-22
+Version: 0.3-4
+Date: 2018-10-02
 Authors@R: c(person("Tim", "Appelhans", email = "tim.appelhans@gmail.com>", role = c("ctb")),
              person("Chris", "Reudenbach", email = "reudenbach@uni-marburg.de", role = c("cre", "aut"))
              )
@@ -18,8 +18,8 @@ RoxygenNote: 6.1.0
 Suggests: knitr, rmarkdown,
 VignetteBuilder: knitr
 NeedsCompilation: no
-Packaged: 2018-09-22 12:12:26 UTC; creu
+Packaged: 2018-10-03 10:28:31 UTC; creu
 Author: Tim Appelhans [ctb],
   Chris Reudenbach [cre, aut]
 Repository: CRAN
-Date/Publication: 2018-09-22 13:00:03 UTC
+Date/Publication: 2018-10-03 11:00:03 UTC

@@ -67,8 +67,22 @@ searchOTBW <- function(DL = "C:",
       # recursive dir for otb*.bat returns all version of otb bat files
       if (!quiet) cat("\nsearching for Orfeo Toolbox installations - this may take a while\n")
       if (!quiet) cat("For providing the path manually see ?searchOTBW \n")
-      raw_OTB <- system(paste0("cmd.exe"," /c dir /B /S ",DL,"\\","otbcli.bat"),intern=TRUE)
-      if (!grepl(DL,raw_OTB)) stop("\n At ",DL," no OTB installation found")
+      
+      
+      options(show.error.messages = FALSE)
+      options(warn=-1)
+      raw_OTB  <- try(system(paste0("cmd.exe"," /c dir /B /S ",DL,"\\","otbcli.bat"),intern=TRUE))
+      if (identical(raw_OTB, character(0))) raw_OTB <- "File not found"
+      if (grepl(raw_OTB,pattern = "File not found") | grepl(raw_OTB,pattern = "Datei nicht gefunden")) {
+
+        class(raw_OTB) <- c("try-error", class(raw_OTB))
+      }
+      options(show.error.messages = TRUE)
+      options(warn=0)
+      
+      if(!class(raw_OTB)[1] == "try-error")  {
+      #if (!grepl(DL,raw_OTB)) stop("\n At ",DL," no OTB installation found")
+      
       # trys to identify valid otb installations and their version numbers
       otbInstallations <- lapply(seq(length(raw_OTB)), function(i){
         # convert codetable according to cmd.exe using type
@@ -108,8 +122,16 @@ searchOTBW <- function(DL = "C:",
       }) # end lapply
       # bind the df lines
       otbInstallations <- do.call("rbind", otbInstallations)
+      
+      } else {
+        if(!quiet) cat("Did not find any valid OTB installation at mount point",DL)
+        return(otbInstallations <- FALSE)}
     }
-  } else {otbInstallations <- "Sorry no Windows system..." }
+  } else {
+    otbInstallations <- NULL
+    cat("Sorry no Windows system..." )
+  
+  }
   return(otbInstallations)
 }
 
@@ -128,6 +150,7 @@ searchOTBW <- function(DL = "C:",
 #' # get all valid OTB installation folders and params
 #' searchOTBX()
 #' }
+
 searchOTBX <- function(MP = "/usr",
                        quiet=TRUE) {
   if (MP=="default") MP <- "/usr"
@@ -136,11 +159,27 @@ searchOTBX <- function(MP = "/usr",
       # recursive dir for otb*.bat returns all version of otb bat files
       if (!quiet) cat("\nsearching for Orfeo Toolbox installations - this may take a while\n")
       if (!quiet) cat("For providing the path manually see ?searchOTBX \n")
-      raw_OTB <- system2("find", paste("/usr"," ! -readable -prune -o -type f -executable -iname 'otbcli' -print"),stdout = TRUE)
-      if (!grepl(MP,raw_OTB)) stop("\n At ",MP," no OTB installation found")
+
+      raw_OTB <- 
+      options(show.error.messages = FALSE)
+      options(warn=-1)
+      raw_OTB  <- try(system2("find", paste("/usr"," ! -readable -prune -o -type f -executable -iname 'ootbcli' -print"),stdout = TRUE))
+      if (identical(raw_OTB, character(0))) raw_OTB <- "File not found"
+      if (grepl(raw_OTB,pattern = "File not found") | grepl(raw_OTB,pattern = "Datei nicht gefunden")) {
+
+        class(raw_OTB) <- c("try-error", class(raw_OTB))
+      }
+      options(show.error.messages = TRUE)
+      options(warn=0)
+      
+      if(!class(raw_OTB)[1] == "try-error") {
+      #if (!grepl(MP,raw_OTB)) stop("\n At ",MP," no OTB installation found")
       # trys to identify valid otb installations and their version numbers
       otbInstallations <- lapply(seq(length(raw_OTB)), function(i){
-      
+        
+       # TODO strip version from OTB /usr/bin/otbcli_BandMath -version
+        # "This is the BandMath application, version 6.0.0"
+        
       # if the the tag "OSGEO4W64" exists set installation_type
           root_dir <- substr(raw_OTB[i],1, gregexpr(pattern = "otbcli", raw_OTB[i])[[1]][1] - 1)
         # put the existing GISBASE directory, version number  and installation type in a data frame
@@ -148,7 +187,9 @@ searchOTBX <- function(MP = "/usr",
       }) # end lapply
       # bind the df lines
       otbInstallations <- do.call("rbind", otbInstallations)
-    
+      } else {
+        if(!quiet) cat("Did not find any valid OTB installation at mount point",MP)
+        return(otbInstallations <- FALSE)}
   
   return(otbInstallations)
 }
@@ -167,7 +208,7 @@ searchOTBX <- function(MP = "/usr",
 #'@export findOTB
 #'
 #'@examples
-#' \dontrun{
+#' \dontrun
 #' # find recursively all existing 'Orfeo Toolbox' installations folders starting 
 #' # at the default search location
 #' findOTB()
@@ -186,6 +227,6 @@ findOTB <- function(searchLocation = "default",
     if (grepl(searchLocation,pattern = ":"))  stop("You are running Linux - please choose a suitable searchLocation argument" )
     else link = link2GI::searchOTBX(MP = searchLocation,
                                     quiet=TRUE)
-  }
+  } 
   return(link)
 }
