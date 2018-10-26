@@ -19,8 +19,8 @@
 setenvOTB <- function(bin_OTB = NULL, root_OTB = NULL){
   # check if running on a HRZMR Pool PC
   if (!exists("GiEnv")) GiEnv <- new.env(parent=globalenv()) 
-  if (substr(Sys.getenv("COMPUTERNAME"),1,5) == "PCRZP") {
-    bin_OTB <- checkPCDomain("otb")   
+  if (substr(Sys.getenv("COMPUTERNAME"),1,5) == "PCRZP1") {
+    bin_OTB <- #checkPCDomain("otb")   
     Sys.setenv(GEOTIFF_CSV = paste0(Sys.getenv("OSGEO4W_ROOT"),"\\share\\epsg_csv"),envir = GiEnv)
   } else {
     # (R) set pathes  of otb modules and binaries depending on OS  
@@ -208,7 +208,7 @@ searchOTBX <- function(MP = "/usr",
 #'@export findOTB
 #'
 #'@examples
-#' \dontrun
+#' \dontrun{
 #' # find recursively all existing 'Orfeo Toolbox' installations folders starting 
 #' # at the default search location
 #' findOTB()
@@ -218,7 +218,7 @@ findOTB <- function(searchLocation = "default",
   
   if (Sys.info()["sysname"] == "Windows") {
     if (searchLocation=="default") searchLocation <- "C:"
-    if (searchLocation %in% paste0(LETTERS,":"))
+    if (grepl(paste0(LETTERS, ":", collapse="|"), searchLocation))
       link = link2GI::searchOTBW(DL = searchLocation,                     
                                  quiet=TRUE)  
     else stop("You are running Windows - Please choose a suitable searchLocation argument that MUST include a Windows drive letter and colon" )

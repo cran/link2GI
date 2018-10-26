@@ -89,7 +89,7 @@ searchSAGAW <- function(DL = "C:",
                         quiet = TRUE) {
   if (DL=="default") DL <- "C:"
   if (Sys.info()["sysname"] == "Windows") {  
-    sagaPath <- checkPCDomain("saga")  
+    sagaPath <- NULL #checkPCDomain("saga")  
     if (is.null(sagaPath)) {
       
       # trys to find a osgeo4w installation on the whole C: disk returns root directory and version name
@@ -115,7 +115,7 @@ searchSAGAW <- function(DL = "C:",
       sagaPath <- lapply(seq(length(rawSAGA)), function(i){
         cmdfileLines <- rawSAGA[i]
         installerType <- ""
-        
+        if (substr(cmdfileLines,1,1) == "\\") rawSAGA[i] <- substr(cmdfileLines,3,nchar(cmdfileLines)) 
         # if "OSGeo4W64" 
         if (length(unique(grep(paste("OSGeo4W64", collapse = "|"), rawSAGA[i], value = TRUE))) > 0) {
           root_dir <- unique(grep(paste("OSGeo4W64", collapse = "|"), rawSAGA[i], value = TRUE))
@@ -186,7 +186,7 @@ findSAGA <- function(searchLocation = "default",
   
   if (Sys.info()["sysname"] == "Windows") {
     if (searchLocation=="default") searchLocation <- "C:"
-    if (searchLocation %in% paste0(LETTERS,":"))
+    if (grepl(paste0(LETTERS, ":", collapse="|"), searchLocation))
       link = link2GI::searchSAGAW(DL = searchLocation,quiet = quiet)  
     else stop("You are running Windows - Please choose a suitable searchLocation argument that MUST include a Windows drive letter and colon" )
   } else {
