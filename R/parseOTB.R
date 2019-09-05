@@ -89,16 +89,15 @@ parseOTBAlgorithms<- function(gili=NULL) {
 #' algo_cmd<-parseOTBFunction(algo = otb_algorithm,gili = otblink)
 #' 
 #' ## define the current run arguments
-#' algo_cmd$`-in`<- file.path(getwd(),"4490600_5321400.tif")
-#' algo_cmd$`-filter`<- "sobel"
+#' algo_cmd$input  <- file.path(getwd(),"4490600_5321400.tif")
+#' algo_cmd$filter <- "sobel"
 #' 
 #' ## create out name
-#' outName<-paste0(getwd(),"/out",algo_cmd$`-filter`,".tif")
-#' algo_cmd$`-out`<- outName
+#' outName <- paste0(getwd(),"/out",algo_cmd$filter,".tif")
+#' algo_cmd$out <- outName
 #' 
-#' ## generate full command
-#' command<-paste(paste0(path_OTB,"otbcli_",otb_algorithm," "),
-#'                paste(names(algo_cmd),algo_cmd,collapse = " "))
+#' ## paste full command
+#' command <- mkOTBcmd(path_OTB,otb_algorithm,algo_cmd)
 #' 
 #' ## make the system call
 #' system(command,intern = TRUE)
@@ -132,9 +131,11 @@ parseOTBFunction <- function(algos=NULL,gili=NULL) {
       
       
          txt<-readLines("otb_module_dump.txt")
+         file.remove("otb_module_dump.txt")
       # Pull out the appropriate line
       args <- txt[grep("-", txt)]
-      if (Sys.info()["sysname"]=="Linux") args <- args[-grep("http",args)]
+      # obviously the format has changed. TODO
+      #if (Sys.info()["sysname"]=="Linux") args <- args[-grep("http",args)]
       
       # Delete unwanted characters in the lines we pulled out
       args <- gsub("MISSING", "     ", args, fixed = TRUE)
@@ -159,28 +160,37 @@ parseOTBFunction <- function(algos=NULL,gili=NULL) {
       otbhelp[[algo]] <- sapply(args, "[", 2:4)
       for (j in 1:(length(args)-1)){
         drop<-FALSE
-        if (length(grep("default value is",sapply(args, "[", 4)[[j]])) > 0)  {
+        default<-""
+        extractit <-FALSE
+        ltmp<-length(grep("default value is",sapply(args, "[", 4)[[j]])) 
+        if(ltmp>0) extractit=TRUE
+        if (extractit)  {
+
           tmp<-strsplit(sapply(args, "[", 4)[[j]],split ="default value is ")[[1]][2]
           tmp <-strsplit(tmp,split =")")[[1]][1]
-          
+          #cat("iwas")
           default <- tmp
         }
-        else if (length(grep("(OTB-Team)",args[[j]])) > 0) drop <- TRUE
-        else if (length(grep("(-help)",args[[j]])) > 0) drop <- TRUE
-        else if (length(grep("(otbcli_)",args[[j]])) > 0) drop <- TRUE
-        else if (length(grep("(-inxml)",args[[j]])) > 0) drop <- TRUE
-        else if (length(grep("(mandatory)",sapply(args, "[", 4)[[j]])) > 0) default <- "mandatory"
-        else if  (sapply(args, "[", 4)[[j]] == "Report progress ") default <- "false"
-        
+        else if (length(grep("(OTB-Team)",args[[j]])) > 0) {drop <- TRUE}
+        else if (length(grep("(-help)",args[[j]])) > 0) {drop <- TRUE}
+        else if (length(grep("(otbcli_)",args[[j]])) > 0) {drop <- TRUE}
+        else if (length(grep("(-inxml)",args[[j]])) > 0) {drop <- TRUE}
+        else if (length(grep("(mandatory)",sapply(args, "[", 4)[[j]])) > 0) {default <- "mandatory"}
+        else if  (sapply(args, "[", 4)[[j]] == "Report progress " & !is.na(sapply(args, "[", 4)[[j]] == "Report progress ")) {
+          default <- "false"}
+       else {
+         
+         default < sapply(args, "[", 4)[[j]]}
 
-        else default < sapply(args, "[", 4)[[j]]
-
-        if (!drop) param[[paste0(sapply(args, "[", 2)[[j]])]] <- default
-        
+        if (!drop &default  != "") {
+          arg<-sapply(args, "[", 2)[[j]]
+          if (arg == "-in") arg<-"-input"
+          param[[paste0(substr(arg,2,nchar(arg)))]] <- default
+        }
       }
 
       if (length(ocmd) > 0)
-        ocmd[[algo]]<- append(otbcmd,assign(algo, param))
+        ocmd[[algo]]<- append(otbcmd,assign(algo, as.character(param)))
       else
         ocmd<-param
       #params <- get_args_man(alg = "otb:localstatisticextraction")
@@ -189,6 +199,19 @@ parseOTBFunction <- function(algos=NULL,gili=NULL) {
   }
   return(ocmd)
 }
+#' paste the OTB command list into a system call compatible string
+#'@description helper function which paste the OTB command list into a system call compatible string
+#'@param path_OTB path to the OTB installastion directory as provided by linkOTB()
+#'@param otb_algorithm the currently choosen otb algorithm keyword
+#'@param algo_cmd the modified algorithm parameter list
+#'@export
+mkOTBcmd <- function(path_OTB,
+                  otb_algorithm,
+                  algo_cmd){
+if (names(algo_cmd)[1] =="input")  names(algo_cmd)[1]<-"in"
 
-
+        command<-paste(paste0(path_OTB,"otbcli_",otb_algorithm," "),
+                 paste0("-",names(algo_cmd)," ",algo_cmd,collapse = " "))
+ return(command) 
+}
 

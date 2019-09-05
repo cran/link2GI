@@ -6,8 +6,8 @@
 \usage{
 linkGRASS7(x = NULL, default_GRASS7 = NULL, search_path = NULL,
   ver_select = FALSE, gisdbase_exist = FALSE, gisdbase = NULL,
-  location = NULL, spatial_params = NULL, resolution = NULL,
-  quiet = TRUE, returnPaths = FALSE)
+  use_home = FALSE, location = NULL, spatial_params = NULL,
+  resolution = NULL, quiet = TRUE, returnPaths = FALSE)
 }
 \arguments{
 \item{x}{raster or sp object}
@@ -23,6 +23,8 @@ If you provide a valid list the corresponding version is initialized. An example
 
 \item{gisdbase}{default is \code{NULL}, invoke \code{tempdir()} to the 'GRASS' database. Alternativeley you can provide a individual path.}
 
+\item{use_home}{default is \code{FALSE}, set the GISRC path to tempdir(), if TRUE the HOME or USERPROFILE setting is used for writing the GISRC file}
+
 \item{location}{default is \code{NULL}, invoke \code{basename(tempfile())} for defining the 'GRASS' location. Alternativeley you can provide a individual path.}
 
 \item{spatial_params}{default is \code{NULL}. Instead of a spatial object you may provide the geometry as a list. E.g. c(xmin,ymin,xmax,ymax,proj4_string)}
@@ -37,12 +39,12 @@ to the PATH variable only, otherwise all paths and versions of the installed GRA
 \description{
 Initializes the session environment and the system pathes for an easy acces to 
 \href{https://grass.osgeo.org/}{'GRASS GIS 7.x'}.  The correct setup of the spatial and projection parameters is
- automatically performed by using either an existing and valid \code{\link{raster}}, \code{\link{sp}} or \code{\link{sf}} object, 
+ automatically performed by using either an existing and valid \code{raster}, \code{sp} or \code{sf} object, 
  or manually by providing a list containing the minimum parameters needed.\cr
 }
 \details{
 The concept is straightforward but for an all days usage helpful. Either you need to 
-provide a \code{\link{raster}} or \code{\link{sp}} \code{\link{sf}} spatial object
+provide a \code{raster} or \code{sp} \code{sf} spatial object
  which has correct spatial and projection properties or you may link directlxy to an existing 'GRASS' gisdbase and mapset. 
  If you choose an spatial object to initialize a correct 'GRASS' mapset it is used to create either a temporary or a permanent 
  \href{https://CRAN.R-project.org/package=rgrass7}{rgrass7} environment including the correct 'GRASS 7' structure.\cr\cr
@@ -52,11 +54,11 @@ provide a \code{\link{raster}} or \code{\link{sp}} \code{\link{sf}} spatial obje
 }
 \note{
 'GRASS GIS 7' is excellently supported by the
- \link{rgrass7} wrapper package. Nevertheless 'GRASS GIS' is well known for
- its high demands regarding the correct spatial and reference setup an a bunch 
+ \code{rgrass7} wrapper package. Nevertheless 'GRASS GIS' is well known for
+ its high demands regarding the correct spatial and reference setup  
  of workspace and environment requirements. This becomes even worse on 'Windows' 
  platforms or if several alternative 'GRASS GIS' installations are available.
- If one knows what to do the \code{\link{rgrass7}} package setup function \code{initGRASS} works fine under Linux. 
+ If one knows what to do the \code{rgrass7} package setup function \code{rgrass7::initGRASS} works fine under Linux. 
  This is also valid for well known configurations under the 'Windows' operation system. 
  Nevertheless on university lab or on company computers with restriced privileges and/or using different releases
  like the  \href{http://trac.osgeo.org/osgeo4w/}{'OSGeo4W'} distribution and the  
