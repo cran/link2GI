@@ -35,44 +35,89 @@
 #  saga1
 #  sagaEnv1<- RSAGA::rsaga.env(path = saga1$sagaPath)
 
-## ----eval=FALSE----------------------------------------------------------
-#  # get meuse data as sp object
+## ---- eval=FALSE---------------------------------------------------------
+#  # get meuse data as sp object and link it temporary to GRASS
 #  require(link2GI)
 #  require(sp)
+#  
+#  # get data
 #  data(meuse)
+#  # add georeference
 #  coordinates(meuse) <- ~x+y
 #  proj4string(meuse) <-CRS("+init=epsg:28992")
 #  
-#  # get meuse data as sf object
-#  require(sf)
-#  meuse_sf = st_as_sf(meuse,
-#                      coords =
-#                        c("x", "y"),
-#                      crs = 28992,
-#                      agr = "constant")
-#  
-#  # create a temporary GRASS linkage using the meuse data
+#  # Automatic search and find of GRASS binaries
+#  # using the meuse sp data object for spatial referencing
+#  # This is the highly recommended linking procedure for on the fly jobs
+#  # NOTE: if more than one GRASS installation is found the highest version will be choosed
 #  
 #  linkGRASS7(meuse)
 
 ## ---- eval=FALSE---------------------------------------------------------
-#  linkGRASS7(meuse,c("C:/Program Files/GRASS GIS7.0.5","GRASS GIS 7.0.5","NSIS"))
+#   require(link2GI)
+#   require(sf)
+#  
+#   # get  data
+#   nc <- st_read(system.file("shape/nc.shp", package="sf"))
+#  
+#   # Automatic search and find of GRASS binaries
+#   # using the nc sf data object for spatial referencing
+#   # This is the highly recommended linking procedure for on the fly jobs
+#   # NOTE: if more than one GRASS installation is found the highest version will be choosed
+#  
+#   grass<-linkGRASS7(nc,returnPaths = TRUE)
+
+## ---- eval=FALSE---------------------------------------------------------
+#    library(link2GI)
+#   require(sf)
+#  
+#   # proj folders
+#   projRootDir<-tempdir()
+#   paths<-link2GI::initProj(projRootDir = projRootDir,
+#                            projFolders = c("project1/"))
+#  
+#   # get  data
+#   nc <- st_read(system.file("shape/nc.shp", package="sf"))
+#  
+#   # CREATE and link to a permanent GRASS folder at "projRootDir", location named "project1"
+#   linkGRASS7(nc, gisdbase = projRootDir, location = "project1")
+#  
+#   # ONLY LINK to a permanent GRASS folder at "projRootDir", location named "project1"
+#   linkGRASS7(gisdbase = projRootDir, location = "project1", gisdbase_exist = TRUE )
+#  
+#  
+#   # setting up GRASS manually with spatial parameters of the nc data
+#   proj4_string <- as.character(sp::CRS("+init=epsg:28992"))
+#   linkGRASS7(spatial_params = c(178605,329714,181390,333611,proj4_string))
+#  
+#   # creating a GRASS gisdbase manually with spatial parameters of the nc data
+#   # additionally using a peramanent directory "projRootDir" and the location "nc_spatial_params "
+#   proj4_string <- as.character(sp::CRS("+init=epsg:4267"))
+#   linkGRASS7(gisdbase = projRootDir,
+#              location = "nc_spatial_params",
+#              spatial_params = c(-84.32385, 33.88199,-75.45698,36.58965,proj4_string))
 #  
 
 ## ---- eval=FALSE---------------------------------------------------------
-#  linkGRASS7(meuse,c("C:/OSGeo4W64","grass-7.0.5","osgeo4W"))
+#  # Link the GRASS installation and define the search location
+#   linkGRASS7(nc, search_path = "~")
 
 ## ---- eval=FALSE---------------------------------------------------------
-#  linkGRASS7(meuse_sf,
-#                       ver_select = TRUE)
-
-## ---- eval=FALSE---------------------------------------------------------
-#  linkGRASS7(meuse_sf,
-#                       search_path = "D:/")
+#  findGRASS()
+#       instDir version installation_type
+#  1 /opt/grass   7.8.1           grass78
 #  
+#  # now linking it
+#  linkGRASS7(nc,c("/opt/grass","7.8.15","grass78"))
+#  
+#  # corresponding linkage running windows
+#  linkGRASS7(nc,c("C:/Program Files/GRASS GIS7.0.5","GRASS GIS 7.0.5","NSIS"))
 
 ## ---- eval=FALSE---------------------------------------------------------
-#  linkGRASS7(x = meuse_sf,
+#  linkGRASS7(nc, ver_select = TRUE)
+
+## ---- eval=FALSE---------------------------------------------------------
+#  linkGRASS7(x = nc,
 #                       gisdbase = "~/temp3",
 #                       location = "project1")
 
@@ -89,85 +134,66 @@
 #                                 +towgs84=565.4171,50.3319,465.5524,
 #                                  -0.398957,0.343988,-1.8774,4.0725
 #                                 +to_meter=1"))
-#  
 
 ## ---- eval=FALSE---------------------------------------------------------
 #  # link to the installed OTB
-#  otbLinks<-link2GI::linkOTB()
-#  
-#  
-#  # get the modulelist from the linked version
-#  algo<-parseOTBAlgorithms(gili = otbLinks)
-#  
-#  
-
-## ---- eval=FALSE---------------------------------------------------------
-#  
-#  ## for the example we use the edge detection,
-#  ## because of the windows call via a batch file
-#  ## we have to distinguish the module name
-#  ifelse(Sys.info()["sysname"]=="Windows",
-#  algo_keyword<- "EdgeExtraction.bat",
-#  algo_keyword<- "EdgeExtraction")
-#  
-#  # now create the command list
-#  algo_cmd<-parseOTBFunction(algo = algo[algo[]==algo_keyword],gili = otblink)
-#  ## print the current command
-#  print(algo_cmd)
-
-## ---- eval=FALSE---------------------------------------------------------
-#  ###########
-#  ### usecase
-#  ###########
-#  
-#  ## link to OTB
 #  otblink<-link2GI::linkOTB()
-#  path_OTB<-otblink$pathOTB
 #  
-#  ## get data
-#  setwd(tempdir())
-#  ## get some typical data as provided by the authority
-#  url<-"http://www.ldbv.bayern.de/file/zip/5619/DOP%2040_CIR.zip"
-#  res <- curl::curl_download(url, "testdata.zip")
-#  unzip(res,junkpaths = TRUE,overwrite = TRUE)
 #  
-#  ## get all available OTB modules
+#  # get the list of modules from the linked version
 #  algo<-parseOTBAlgorithms(gili = otblink)
-#  
+
+## ---- eval=FALSE---------------------------------------------------------
 #  ## for the example we use the edge detection,
-#  ## because of the windows call via a batch file
-#  ## we have to distinguish the module name
-#  ifelse(Sys.info()["sysname"]=="Windows",
-#  algo_keyword<- "EdgeExtraction.bat",
-#  algo_keyword<- "EdgeExtraction")
+#  algoKeyword<- "EdgeExtraction"
 #  
-#  # write it to a variable
-#  otb_algorithm<-algo[algo[]==algo_keyword]
-#  # now create the command list
-#  algo_cmd<-parseOTBFunction(algo = otb_algorithm,gili = otblink)
+#  ## extract the command list for the choosen algorithm
+#  cmd<-parseOTBFunction(algo = algoKeyword, gili = otblink)
 #  
-#  ## define the current run arguments
-#  algo_cmd$`-in`<- file.path(getwd(),"4490600_5321400.tif")
-#  algo_cmd$`-filter`<- "sobel"
+#  ## print the current command
+#  print(cmd)
+
+## ----eval=FALSE----------------------------------------------------------
+#  require(link2GI)
+#  require(raster)
+#  require(listviewer)
 #  
-#  ## create out name
-#  outName<-paste0(getwd(),"/out",algo_cmd$`-filter`,".tif")
-#  algo_cmd$`-out`<- outName
+#  otblink<-link2GI::linkOTB()
+#   projRootDir<-tempdir()
 #  
-#  ## generate full command
-#  command<-paste(paste0(path_OTB,"otbcli_",otb_algorithm," "),
-#                 paste(names(algo_cmd),algo_cmd,collapse = " "))
+#  data("rgb")
+#  raster::plotRGB(rgb)
+#  r<-raster::writeRaster(rgb,
+#                filename=file.path(projRootDir,"test.tif"),
+#                format="GTiff", overwrite=TRUE)
+#  ## for the example we use the edge detection,
+#  algoKeyword<- "EdgeExtraction"
 #  
-#  ## make the system call
-#  system(command,intern = TRUE)
+#  ## extract the command list for the choosen algorithm
+#  cmd<-parseOTBFunction(algo = algoKeyword, gili = otblink)
 #  
-#  ##create raster
-#  retStack<-assign(outName,raster::raster(outName))
+#  ## get help using the convenient listviewer
+#  listviewer::jsonedit(cmd$help)
 #  
-#  ## plot raster
-#  raster::plot(retStack)
+#  ## define the mandantory arguments all other will be default
+#  cmd$input  <- file.path(projRootDir,"test.tif")
+#  cmd$filter <- "touzi"
+#  cmd$channel <- 2
+#  cmd$out <- file.path(projRootDir,paste0("out",cmd$filter,".tif"))
 #  
-#  ## End(Not run)
+#  ## run algorithm
+#  retStack<-runOTB(cmd,gili = otblink)
+#  
+#  ## plot filter raster on the green channel
+#  plot(retStack)
+#  
+#  
+#  
+#  
+#  
+#  
+#  
+#  
 
 ## ---- eval=FALSE---------------------------------------------------------
 #   # we need some additional packages
@@ -233,6 +259,7 @@
 #                      location = "microzensus2011")
 
 ## ---- eval=FALSE---------------------------------------------------------
+#  require(link2GI)
 #  require(raster)
 #  require(rgrass7)
 #  
@@ -274,16 +301,4 @@
 #  
 #  # check imported data set
 #  rgrass7::execGRASS('v.info', map = "Zensus_Bevoelkerung_100m_")
-
-## ---- eval=FALSE---------------------------------------------------------
-#  install.packages(c("sf", "raster",  "rgdal", "gdalUtils",
-#                     "tools", "rgrass7", "sp", "RSAGA", "link2GI"))
-#  
-#  # for the Canopy height model usecase you need to install uavRst
-#  devtools::install_github("gisma/uavRst", ref = "master")
-
-## ---- eval=FALSE---------------------------------------------------------
-#  url <- "https://github.com/gisma/link2gi2018/archive/master.zip"
-#  res <- curl::curl_download(url, paste0(tmpDir(),"master.zip"))
-#  utils::unzip(zipfile = res, exdir = "~")
 
