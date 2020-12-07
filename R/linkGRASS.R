@@ -17,8 +17,8 @@ if (!isGeneric('linkGRASS7')) {
 #'  If one knows what to do the \code{rgrass7} package setup function \code{rgrass7::initGRASS} works fine under Linux. 
 #'  This is also valid for well known configurations under the 'Windows' operation system. 
 #'  Nevertheless on university lab or on company computers with restriced privileges and/or using different releases
-#'  like the  \href{http://trac.osgeo.org/osgeo4w/}{'OSGeo4W'} distribution and the  
-#'  \href{https://grass.osgeo.org/download/software/ms-windows/#stand-alone}{'GRASS 7' stand-alone} installation, 
+#'  like the  \href{https://trac.osgeo.org/osgeo4w/}{'OSGeo4W'} distribution and the  
+#'  \href{https://grass.osgeo.org/download/windows/}{'GRASS 7' stand-alone} installation, 
 #'  or different software releases (e.g. 'GRASS 7.0.5 and GRASS 7.2.0), it becomes often cumbersome or even impossible to get the correct linkages. \cr 
 #'  The function \code{linkGRASS7} tries to find all valid 'GRASS GIS' binaries by analyzing
 #'  the startup script files of 'GRASS GIS'. After identifying the 'GRASS GIS' binaries all
@@ -131,7 +131,7 @@ linkGRASS7 <- function(x = NULL,
     grass <- paramGRASSw(default_GRASS7,search_path,ver_select)
   } else {
     if (use_home) home <- Sys.getenv("HOME")
-    if (is.null(search_path)) search_path <- "/usr"
+    if (is.null(search_path)) search_path <- "/usr/bin"
     grass <- paramGRASSx(default_GRASS7,search_path,ver_select)
   }
   if (grass[[1]][1] != FALSE) {
@@ -187,7 +187,7 @@ linkGRASS7 <- function(x = NULL,
           xmin <- corner[1]
           ymax <- corner[4]
           ymin <- corner[2]
-          proj4 <-  unlist(sf::st_crs(x)[2])
+          proj4 <-  sf::st_crs(x)$proj4string
           if (!is.null(resolution)) resolution<- resolution
           else resolution <- "1"
         } else {

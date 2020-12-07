@@ -1,3 +1,28 @@
+## link2GI 0.4-5
+
+bugfixes:
+* fix issue #42, #44, #46, #48, #49
+
+new feature:
+* add installation vignette
+* update some documentation
+
+## link2GI 0.4-4
+
+bugfixes:
+* fix issue #42
+
+## link2GI 0.4-3
+
+bugfixes:
+* fix issue #40 
+
+## link2GI 0.4-2
+
+bugfixes:
+* fix issue #38
+
+
 ## link2GI 0.4-1
 new feature
 * add linkall

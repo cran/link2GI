@@ -83,6 +83,9 @@ searchGDALW <- function(DL = "C:",
         # convert codetable according to cmd.exe using type
         batchfile_lines <- raw_GDAL[i]
         installerType <- ""
+        installDir = ""
+        root_dir=""
+
         # if the the tag "OSGEO4W64" exists set installation_type
         if (length(unique(grep(paste("OSGeo4W64", collapse = "|"), raw_GDAL[i], value = TRUE))) > 0) {
           root_dir <- unique(grep(paste("OSGeo4W64", collapse = "|"), raw_GDAL[i], value = TRUE))
@@ -116,6 +119,7 @@ searchGDALW <- function(DL = "C:",
           if (file.exists(file.path(root_dir,"gdalinfo.exe"))) installerType <- "GDAL"
           else installerType <- "unknown"
           
+          
           installDir <- substr(root_dir,1, gregexpr(pattern = "bin", root_dir)[[1]][1] - 2)
           
         }        # if the the tag "GRASS-" exists set installation_type
@@ -136,7 +140,30 @@ searchGDALW <- function(DL = "C:",
           else installerType <- "unknown"
           
         }
-        
+        else if (length(unique(grep(paste("conda", collapse = "|"), batchfile_lines, value = TRUE))) > 0){
+          root_dir <- unique(grep(paste("conda", collapse = "|"), raw_GDAL[i], value = TRUE))
+          root_dir <- substr(root_dir,1, gregexpr(pattern = "gdalinfo.exe", root_dir)[[1]][1] - 1)
+          installDir <- substr(root_dir,1, gregexpr(pattern = "bin", root_dir)[[1]][1] - 2)
+          if (file.exists(file.path(root_dir,"gdalinfo.exe"))) installerType <- "Conda_Miniconda"
+          else installerType <- "unknown"
+          
+        }
+        else if (length(unique(grep(paste("Progra~1", collapse = "|"), batchfile_lines, value = TRUE))) > 0){
+          root_dir <- unique(grep(paste("GRASS", collapse = "|"), raw_GDAL[i], value = TRUE))
+          root_dir <- substr(root_dir,1, gregexpr(pattern = "gdalinfo.exe", root_dir)[[1]][1] - 1)
+          installDir <- substr(root_dir,1, gregexpr(pattern = "bin", root_dir)[[1]][1] - 2)
+          if (file.exists(file.path(root_dir,"gdalinfo.exe"))) installerType <- "GRASS_standalone"
+          else installerType <- "unknown"
+          
+        }
+        else {
+          root_dir <-  raw_GDAL[i]
+          root_dir <- substr(root_dir,1, gregexpr(pattern = "gdalinfo.exe", root_dir)[[1]][1] - 1)
+          installDir <- substr(root_dir,1, gregexpr(pattern = "bin", root_dir)[[1]][1] - 2)
+          if (file.exists(file.path(root_dir,"gdalinfo.exe"))) installerType <- "Miniconda"
+          else installerType <- "unknown"
+          
+        }
         # put the existing GISBASE directory, version number  and installation type in a data frame
         data.frame(binDir = root_dir, baseDir = installDir, installation_type = installerType, stringsAsFactors = FALSE)
       }) # end lapply
@@ -276,14 +303,19 @@ getrowGDALVer<- function (paths){
   #tmp<-c()
   scmd = ifelse(Sys.info()["sysname"]=="Windows", "gdalinfo.exe", "gdalinfo")
   sep = ifelse(Sys.info()["sysname"]=="Windows", "\\", "/")
-  highestVer<-"1.4.0"
+  highestVer<-"1.2.0"
+  options(show.error.messages = FALSE)
+  options(warn=-1)  
   for (i in 1:nrow(paths)){
-    
-    ret<- system(paste0(paste0(shQuote(paths$binDir[i]),sep,scmd)," --version"),intern = TRUE)
-    
-    tmp<-  strsplit(x = ret ,split = "GDAL ")[[1]][2]
-    tmp2<- strsplit(x = tmp,split = ", released ")[[1]][1]
-    highestVer <- max(tmp2,highestVer)
+   
+
+    ret<-  try(system(paste0(paste0(shQuote(paths$binDir[i]),sep,scmd)," --version"),intern = TRUE))
+
+      if( substr(ret,1,4) == "GDAL" && length(ret) > 0){ 
+        tmp<-  strsplit(x = ret ,split = "GDAL ")[[1]][2]
+        tmp2<- strsplit(x = tmp,split = ", released ")[[1]][1]
+        highestVer <- max(tmp2,highestVer)}
+
     pathI <- i
   }
   return (pathI)
