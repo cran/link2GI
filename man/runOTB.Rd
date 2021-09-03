@@ -13,19 +13,23 @@ runOTB(otbCmdList = NULL, gili = NULL, retRaster = TRUE, quiet = TRUE)
 
 \item{retRaster}{boolean if TRUE a raster stack is returned}
 
-\item{quiet}{boolean  switch for supressing messages default is TRUE}
+\item{quiet}{boolean  switch for suppressing messages default is TRUE}
 }
 \description{
 Wrapper function which paste the OTB command list into a system call compatible string and execute this command.
+}
+\details{
+#' Please NOTE: You must check the help to identify the correct input file argument codewort ($input_in or $input_il).
 }
 \examples{
 \dontrun{
 require(link2GI)
 require(raster)
 require(listviewer)
+rgdal::set_thin_PROJ6_warnings(TRUE)
 
 ## link to OTB
-otbLink<-link2GI::linkOTB()
+otblink<-link2GI::linkOTB()
 
 if (otblink$exist) {
  projRootDir<-tempdir()
@@ -36,26 +40,52 @@ if (otblink$exist) {
                         format="GTiff", 
                         overwrite=TRUE)
 
-## for the example we use the Statistic Extraction, 
+## for an image output example we use the Statistic Extraction, 
 algoKeyword<- "LocalStatisticExtraction"
 
 ## extract the command list for the choosen algorithm 
-cmd<-parseOTBFunction(algo = algoKeyword, gili = otbLink)
+cmd<-parseOTBFunction(algo = algoKeyword, gili = otblink)
 
-## get help using the convenient listviewer
+## Please NOTE:
+## You must check the help to identify the correct argument codewort ($input_in or $input_il)
 listviewer::jsonedit(cmd$help)
 
-## define the mandantory arguments all other will be default
-cmd$input  <- file.path(tempdir(),"test.tif")
+## define the mandatory arguments all other will be default
+cmd$input_in  <- file.path(tempdir(),"test.tif")
 cmd$out <- file.path(tempdir(),"test_otb_stat.tif")
 cmd$radius <- 7
 
 ## run algorithm
-retStack<-runOTB(cmd,gili = otbLink)
+retStack<-runOTB(cmd,gili = otblink)
 
 ## plot raster
 raster::plot(retStack)
 
+## for a data output example we use the 
+
+algoKeyword<- "ComputeImagesStatistics"
+
+## extract the command list for the chosen algorithm 
+cmd<-parseOTBFunction(algo = algoKeyword, gili = otblink)
+
+## get help using the convenient listviewer
+listviewer::jsonedit(cmd$help)
+
+## define the mandatory arguments all other will be default
+cmd$input_il  <- file.path(tempdir(),"test.tif")
+cmd$ram <- 4096
+cmd$out <- file.path(tempdir(),"test_otb_stat.xml")
+cmd$progress <- 1
+
+## run algorithm
+ret <- runOTB(cmd,gili = otblink, quiet = F)
+
+## as vector
+print(ret)
+
+## as xml
+XML::xmlParse(cmd$out)
+ 
 }
 }
 }

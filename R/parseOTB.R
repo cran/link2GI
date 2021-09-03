@@ -7,12 +7,12 @@
 #'@examples
 #' \dontrun{
 #' ## link to the OTB binaries
-#' otbLink<-link2GI::linkOTB()
+#' otblink<-link2GI::linkOTB()
 #' 
-#'  if (otbLink$exist) {
+#'  if (otblink$exist) {
 #' 
 #'  ## parse all modules
-#'  moduleList<-parseOTBAlgorithms(gili = otbLink)
+#'  moduleList<-parseOTBAlgorithms(gili = otblink)
 #' 
 #'  ## print the list
 #'  print(moduleList)
@@ -25,6 +25,7 @@ parseOTBAlgorithms<- function(gili=NULL) {
     otb<-link2GI::linkOTB()
     path_OTB<- otb$pathOTB
   } else path_OTB<- gili$pathOTB
+  path_OTB = ifelse(Sys.info()["sysname"]=="Windows", utils::shortPathName(path_OTB),path_OTB)
   
   if (substr(path_OTB,nchar(path_OTB) - 1,nchar(path_OTB)) == "n/")   path_OTB <- substr(path_OTB,1,nchar(path_OTB)-1)
   
@@ -44,15 +45,15 @@ parseOTBAlgorithms<- function(gili=NULL) {
 
 #' \dontrun{
 ## link to the OTB binaries
-#' otbLink<-link2GI::linkOTB()
-#' if (otbLink$exist) {
+#' otblink<-link2GI::linkOTB()
+#' if (otblink$exist) {
 #' 
 #' ## parse all modules
-#' algos<-parseOTBAlgorithms(gili = otbLink)
+#' algos<-parseOTBAlgorithms(gili = otblink)
 #' 
 #' 
 #' ## take edge detection
-#' cmdList<-parseOTBFunction(algo = algos[27],gili = otbLink)
+#' cmdList<-parseOTBFunction(algo = algos[27],gili = otblink)
 #' ## print the current command
 #' print(cmdList)
 #' }
@@ -70,16 +71,16 @@ parseOTBFunction <- function(algo=NULL,gili=NULL) {
   otbhelp <- list()
   
   otbtype <- list()
-  
+  path_OTB = ifelse(Sys.info()["sysname"]=="Windows", utils::shortPathName(path_OTB),path_OTB)
   
   if (algo != "" & otb$exist){
     system("rm otb_module_dump.txt",intern = FALSE,ignore.stderr = TRUE)
     ifelse(Sys.info()["sysname"]=="Windows",
-           system(paste0(file.path(R.utils::getAbsolutePath(path_OTB),paste0("otbcli_",algo))," -help >> " ,file.path(R.utils::getAbsolutePath(tempdir()),paste0("otb_module_dump.txt 2>&1")))), 
+           system(paste0(file.path(R.utils::getAbsolutePath(utils::shortPathName(path_OTB)),paste0("otbcli_",algo))," -help >> " ,file.path(R.utils::getAbsolutePath(tempdir()),paste0("otb_module_dump.txt 2>&1")))), 
            system(paste0(file.path(R.utils::getAbsolutePath(path_OTB),paste0("otbcli_",algo))," -help >> " ,file.path(R.utils::getAbsolutePath(tempdir()),paste0("otb_module_dump.txt 2>&1"))))
            )
     
-    txt<-readLines(file.path(tempdir(),"otb_module_dump.txt"))
+    txt <-readLines(file.path(tempdir(),"otb_module_dump.txt"))
     file.remove(file.path(tempdir(),"otb_module_dump.txt"))
     # Pull out the appropriate line
     args <- txt[grep("-", txt)]
@@ -133,7 +134,8 @@ parseOTBFunction <- function(algo=NULL,gili=NULL) {
       
       if (!drop &default  != "") {
         arg<-sapply(args, "[", 2)[[j]]
-        if (arg == "-in") arg<-"-input"
+        if (arg == "-in" ) arg<-"-input_in"
+        if (arg == "-il" ) arg<-"-input_il"
         param[[paste0(substr(arg,2,nchar(arg)))]] <- default
       }
     }
@@ -151,10 +153,11 @@ parseOTBFunction <- function(algo=NULL,gili=NULL) {
   t[[1]]<-NULL
   helpList<-list()
   for (arg in names(t)){
-    if (arg =="input")  arg<-"in"
+#    if (arg =="input_in")  arg<-"in"
+#    if (arg =="input_il")  arg<-"il"
     if (arg != "progress")  {
       system(paste0(path_OTB,"otbcli_",paste0(algo," -help ",arg ,paste0(" >> ",file.path(tempdir(),ocmd[[1]]),"-",arg,".txt 2>&1"))))
-      helpList[[arg]]<-readLines(paste0(file.path(tempdir(),ocmd[[1]]),"-",arg,".txt"))
+      helpList[[arg]]<-unique(readLines(paste0(file.path(tempdir(),ocmd[[1]]),"-",arg,".txt")))
       #file.remove(paste0(file.path(tempdir(),ocmd[[1]]),"-",arg,".txt"),showWarnings = TRUE)
       drop <-grep(x = helpList[[arg]],pattern =  "\\w*no version information available\\w*")
       drop<-append(drop,grep(x = helpList[[arg]],pattern =  '^$'))
@@ -171,16 +174,18 @@ parseOTBFunction <- function(algo=NULL,gili=NULL) {
 #'@description Wrapper function which paste the OTB command list into a system call compatible string and execute this command. 
 #'@param otbCmdList the OTB algorithm parameter list
 #'@param gili optional gis linkage as done by `linkOTB()`
-#'@param quiet boolean  switch for supressing messages default is TRUE
+#'@param quiet boolean  switch for suppressing messages default is TRUE
 #'@param retRaster boolean if TRUE a raster stack is returned
+#'@details #' Please NOTE: You must check the help to identify the correct input file argument codewort ($input_in or $input_il). 
 #'@examples
 #'\dontrun{
 #' require(link2GI)
 #' require(raster)
 #' require(listviewer)
+#' rgdal::set_thin_PROJ6_warnings(TRUE)
 #' 
 #' ## link to OTB
-#' otbLink<-link2GI::linkOTB()
+#' otblink<-link2GI::linkOTB()
 #' 
 #' if (otblink$exist) {
 #'  projRootDir<-tempdir()
@@ -191,26 +196,52 @@ parseOTBFunction <- function(algo=NULL,gili=NULL) {
 #'                         format="GTiff", 
 #'                         overwrite=TRUE)
 #' 
-#' ## for the example we use the Statistic Extraction, 
+#' ## for an image output example we use the Statistic Extraction, 
 #' algoKeyword<- "LocalStatisticExtraction"
 #' 
 #' ## extract the command list for the choosen algorithm 
-#' cmd<-parseOTBFunction(algo = algoKeyword, gili = otbLink)
+#' cmd<-parseOTBFunction(algo = algoKeyword, gili = otblink)
 #' 
-#' ## get help using the convenient listviewer
+#' ## Please NOTE:
+#' ## You must check the help to identify the correct argument codewort ($input_in or $input_il)
 #' listviewer::jsonedit(cmd$help)
 #' 
-#' ## define the mandantory arguments all other will be default
-#' cmd$input  <- file.path(tempdir(),"test.tif")
+#' ## define the mandatory arguments all other will be default
+#' cmd$input_in  <- file.path(tempdir(),"test.tif")
 #' cmd$out <- file.path(tempdir(),"test_otb_stat.tif")
 #' cmd$radius <- 7
 #' 
 #' ## run algorithm
-#' retStack<-runOTB(cmd,gili = otbLink)
+#' retStack<-runOTB(cmd,gili = otblink)
 #' 
 #' ## plot raster
 #' raster::plot(retStack)
 #' 
+#' ## for a data output example we use the 
+#' 
+#' algoKeyword<- "ComputeImagesStatistics"
+#' 
+#' ## extract the command list for the chosen algorithm 
+#' cmd<-parseOTBFunction(algo = algoKeyword, gili = otblink)
+#' 
+#' ## get help using the convenient listviewer
+#' listviewer::jsonedit(cmd$help)
+#' 
+#' ## define the mandatory arguments all other will be default
+#' cmd$input_il  <- file.path(tempdir(),"test.tif")
+#' cmd$ram <- 4096
+#' cmd$out <- file.path(tempdir(),"test_otb_stat.xml")
+#' cmd$progress <- 1
+#' 
+#' ## run algorithm
+#' ret <- runOTB(cmd,gili = otblink, quiet = F)
+#' 
+#' ## as vector
+#' print(ret)
+#' 
+#' ## as xml
+#' XML::xmlParse(cmd$out)
+#'  
 #' }
 #'}
 #'@export
@@ -225,33 +256,65 @@ runOTB <- function(otbCmdList=NULL,
     path_OTB<- otb$pathOTB
   } else path_OTB<- gili$pathOTB
   
-  otb_algorithm<-otbCmdList[1]  
+  otb_algorithm<-unlist(otbCmdList[1])  
   otbCmdList[1]<-NULL
   otbCmdList$help<-NULL
-  otbCmdList$out <-gsub(" ", "\\\\ ", R.utils::getAbsolutePath(otbCmdList$out))  
-  otbCmdList$input <- gsub(" ", "\\\\ ", R.utils::getAbsolutePath(otbCmdList$input))  
+  
   if(Sys.info()["sysname"]== "Windows") otb_algorithm <- paste0(otb_algorithm,".bat")
-  if (names(otbCmdList)[1] == "input")  {
+  
+  if (names(otbCmdList)[1] == "input_in")  {
+    otbCmdList$input_in <- gsub(" ", "\\/ ", R.utils::getAbsolutePath(otbCmdList$input_in))  
     names(otbCmdList)[1]<-"in"
-    }
+  }
+  else if (names(otbCmdList)[1] == "input_il")  {
+    otbCmdList$input_il <- gsub(" ", "\\/ ", R.utils::getAbsolutePath(otbCmdList$input_il))  
+    names(otbCmdList)[1]<-"il"
+  }
+  else if (names(otbCmdList)[1] == "io.il")  {
+    otbCmdList$io.il <- gsub(" ", "\\/ ", R.utils::getAbsolutePath(otbCmdList$io.il))
+  }
+  
+  if(!is.null(otbCmdList$out)){
+    otbCmdList$out <-gsub(" ", "\\/ ", R.utils::getAbsolutePath(otbCmdList$out))  
+    outn = otbCmdList$out
+  } else {
+    otbCmdList$io.out <-gsub(" ", "\\/ ", R.utils::getAbsolutePath(otbCmdList$io.out))
+    outn = otbCmdList$io.out
+  }
   
   command<-paste(paste0(path_OTB,"otbcli_",otb_algorithm," "),
                  paste0("-",names(otbCmdList)," ",otbCmdList,collapse = " "))
+  
+  command = gsub("\\\\", "/", command)
+  
   if (quiet){
     system(command,ignore.stdout = TRUE,ignore.stderr = TRUE,intern = FALSE)
-    if (retRaster){
-      outn=gsub("\\\\", "", path.expand(otbCmdList$out))
-      rStack <- assign(outn,raster::stack(outn))
-      return(rStack)
+    if (retRaster ){
+      #outn=gsub("\\/", "", path.expand(otbCmdList$out))
+      if (length(grep("xml", outn)) == 0) {
+        rStack <- assign(tools::file_path_sans_ext(basename(outn)),raster::stack(outn))
+        return(rStack)}
+      else {
+        
+        #warning("NOTE: ", outn," is not a raster\n")
+        return(readLines(outn)) 
+      }
     }
   }
   else {
-    system(command,ignore.stdout = FALSE,ignore.stderr = FALSE,intern = TRUE)
+    ret=system(command,ignore.stdout = FALSE,ignore.stderr = FALSE,intern = TRUE)
+    lapply(ret, print)
+    message(command)
     if (retRaster){
-      outn=gsub("\\\\", "", path.expand(otbCmdList$out))
-      rStack <- assign(outn,raster::stack(outn))
-#      rStack<-assign(otbCmdList$out,raster::stack(otbCmdList$out))
-      return(rStack)
+      #outn=gsub("\\/", "", path.expand(otbCmdList$out))
+      if (length(grep("xml", outn)) == 0) {
+        rStack <- assign(tools::file_path_sans_ext(basename(outn)),raster::stack(outn))
+        return(rStack)}
+      else {
+        #warning("NOTE: ", outn," is not a raster\n")
+        return(data=readLines(outn))
+      }
+      
     }
   }
 }
