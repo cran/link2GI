@@ -57,28 +57,28 @@
 ## ---- eval=FALSE--------------------------------------------------------------
 #  require(link2GI)
 #  # initialize GRASS and set up a permanent structure
-#  link2GI::linkGRASS7(x = r,
+#  link2GI::linkGRASS(x = r,
 #                      gisdbase = paste0(tempdir(),"/link2GI_examples"),
 #                      location = "microzensus2011")
 
 ## ---- eval=FALSE--------------------------------------------------------------
 #  require(link2GI)
 #  require(raster)
-#  require(rgrass7)
+#  require(rgrass)
 #  
 #  # write it to geotiff
 #    raster::writeRaster(r, paste0(path_run,"/Zensus_Bevoelkerung_100m-Gitter.tif"),
 #                        overwrite = TRUE)
 #  
 #  # import raster to GRASS
-#  rgrass7::execGRASS('r.external',
+#  rgrass::execGRASS('r.external',
 #                     flags=c('o',"overwrite","quiet"),
 #                     input=paste0(path_run,"/Zensus_Bevoelkerung_100m-Gitter.tif"),
 #                     output="Zensus_Bevoelkerung_100m_Gitter",
 #                     band=1)
 #  
 #  # check imported data set
-#  rgrass7::execGRASS('r.info',
+#  rgrass::execGRASS('r.info',
 #                     map = "Zensus_Bevoelkerung_100m_Gitter")
 
 ## ---- eval=FALSE--------------------------------------------------------------
@@ -105,5 +105,5 @@
 #             )
 #  
 #  # check imported data set
-#  rgrass7::execGRASS('v.info', map = "Zensus_Bevoelkerung_100m_")
+#  rgrass::execGRASS('v.info', map = "Zensus_Bevoelkerung_100m_")
 

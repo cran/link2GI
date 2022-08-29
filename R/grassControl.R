@@ -1,8 +1,8 @@
-#'@title Usually for internally usage, get 'GRASS GIS' and \code{rgrass7} parameters on 'Linux' OS
+#'@title Usually for internally usage, get 'GRASS GIS' and \code{rgrass} parameters on 'Linux' OS
 #'@name paramGRASSx
-#'@description Initialize and set up \code{rgrass7}  for 'Linux'
-#'@details During the rsession you will have full access to GRASS7 GIS via the \code{rgrass7} wrappe. Additionally you may use also use the API calls of GRASS7 via the command line.
-#'@param set_default_GRASS7 default = NULL will force a search for 'GRASS GIS' You may provide a valid combination as 
+#'@description Initialize and set up \code{rgrass}  for 'Linux'
+#'@details During the rsession you will have full access to GRASS7 GIS via the \code{rgrass} wrappe. Additionally you may use also use the API calls of GRASS7 via the command line.
+#'@param set_default_GRASS default = NULL will force a search for 'GRASS GIS' You may provide a valid combination as 
 #'                                    c("/usr/lib/grass74","7.4.1","grass74")
 #'@param MP mount point to be searched. default is "/usr/bin"
 #'@param quiet boolean  switch for supressing console messages default is TRUE
@@ -22,7 +22,7 @@
 #' paramGRASSx("/usr/local/bin/grass72")
 #' }
 
-paramGRASSx <- function(set_default_GRASS7=NULL, 
+paramGRASSx <- function(set_default_GRASS=NULL, 
                         MP = "/usr/bin",
                         ver_select = FALSE, 
                         quiet =TRUE){
@@ -30,13 +30,13 @@ paramGRASSx <- function(set_default_GRASS7=NULL,
   if (ver_select == "F" && !is.numeric(ver_select)) ver_select <- FALSE
   if (Sys.info()["sysname"]=="Windows") return(cat("You are running Windows - Please choose a suitable searchLocation argument that MUST include a Windows drive letter and colon"))
   # iF WE KNOW NOTHING ABOUT grass PATHES WE HAVE TO SEARCH
-  if (is.null(set_default_GRASS7 )) {
+  if (is.null(set_default_GRASS )) {
     # SEARCH FOR INSTALLATIONS
     params_GRASS <- findGRASS(searchLocation = MP)
   }
-  # if e know  already something it has to be provided in set_default_GRASS7
+  # if e know  already something it has to be provided in set_default_GRASS
   else {   
-    params_GRASS <- rbind.data.frame(set_default_GRASS7)
+    params_GRASS <- rbind.data.frame(set_default_GRASS)
     names(params_GRASS)<-c("instDir","version","installation_type")
   }
   
@@ -73,10 +73,10 @@ paramGRASSx <- function(set_default_GRASS7=NULL,
       gisbase_GRASS <- params_GRASS$instDir[[ver]]
     }
     
-    # if a set_default_GRASS7 was provided take this 
+    # if a set_default_GRASS was provided take this 
     #} 
     # else {
-    #   gisbase_GRASS <- set_default_GRASS7
+    #   gisbase_GRASS <- set_default_GRASS
     # }
     grass<-list()
     grass$gisbase_GRASS<-gisbase_GRASS
@@ -87,17 +87,17 @@ paramGRASSx <- function(set_default_GRASS7=NULL,
   
   #return(gisbase_GRASS)
 }
-#'@title Usually for internally usage get 'GRASS GIS' and \code{rgrass7} parameters on 'Windows' OS
+#'@title Usually for internally usage get 'GRASS GIS' and \code{rgrass} parameters on 'Windows' OS
 #'@name paramGRASSw
 #'@description Initialize the enviroment variables on a 'Windows' OS for using 
-#'  'GRASS GIS' via \code{rgrass7}
+#'  'GRASS GIS' via \code{rgrass}
 #'@details The concept is very straightforward but for an all days usage pretty
 #'  helpful. You need to provide a \code{raster} or a \code{sp} object. The derived properties are used to initialize a temporary but static
-#'  \href{https://CRAN.R-project.org/package=rgrass7}{rgrass7} environment. During the rsession you will have full access to
+#'  \href{https://CRAN.R-project.org/package=rgrass}{rgrass} environment. During the rsession you will have full access to
 #'  GRASS7 both via the wrapper package as well as the command line. paramGRASSw initializes the usage of GRASS7.
 #'@param DL raster or sp object
 #'@param ver_select boolean default is FALSE. If there is more than one 'SAGA GIS' installation and \code{ver_select} = TRUE the user can select interactively the preferred 'SAGA GIS' version 
-#'@param set_default_GRASS7 default = NULL forces a full search for 'GRASS GIS' binaries. You may
+#'@param set_default_GRASS default = NULL forces a full search for 'GRASS GIS' binaries. You may
 #'  alternatively provide a vector containing pathes and keywords. c("C:/OSGeo4W64","grass-7.0.5","osgeo4w") is valid for a typical osgeo4w installation.
 #'  
 #'@param quiet boolean  switch for supressing console messages default is TRUE
@@ -113,7 +113,7 @@ paramGRASSx <- function(set_default_GRASS7=NULL,
 #' paramGRASSw(c("C:/OSGeo4W64","grass-7.0.5","osgeo4W"))
 #' }
 
-paramGRASSw <- function(set_default_GRASS7=NULL, 
+paramGRASSw <- function(set_default_GRASS=NULL, 
                         DL="C:", 
                         ver_select =FALSE,
                         quiet = TRUE) {
@@ -121,15 +121,15 @@ paramGRASSw <- function(set_default_GRASS7=NULL,
   if (ver_select == "F" && !is.numeric(ver_select)) ver_select <- FALSE
   if (Sys.info()["sysname"]=="Linux") return(cat("You are running Linux - please choose a suitable searchLocation argument"))
   # (R) set pathes  of 'GRASS' binaries depending on 'WINDOWS'
-  if (is.null(set_default_GRASS7)) {
+  if (is.null(set_default_GRASS)) {
     if (DL=="default" || is.null(DL)) DL <- "C:"
     # if no path is provided  we have to search
     params_GRASS <- findGRASS(searchLocation = DL,
                               quiet = quiet)
   }   
-  # if e know  already something it has to be provided in set_default_GRASS7
+  # if e know  already something it has to be provided in set_default_GRASS
   else {   
-    params_GRASS <- rbind.data.frame(set_default_GRASS7)
+    params_GRASS <- rbind.data.frame(set_default_GRASS)
     names(params_GRASS)<-c("instDir","version","installation_type")
   }
   if (params_GRASS[[1]][1] != FALSE) {
@@ -183,15 +183,15 @@ paramGRASSw <- function(set_default_GRASS7=NULL,
       installation_type = params_GRASS$installation_type[[ver]]
     }   
     
-    # if a set_default_GRASS7 was provided take this 
+    # if a set_default_GRASS was provided take this 
     # } 
     # else {
-    #    gisbase_GRASS <- setenvGRASSw(root_GRASS = set_default_GRASS7[1],
-    #                                  grass_version = set_default_GRASS7[2], 
-    #                                  installation_type = set_default_GRASS7[3],
+    #    gisbase_GRASS <- setenvGRASSw(root_GRASS = set_default_GRASS[1],
+    #                                  grass_version = set_default_GRASS[2], 
+    #                                  installation_type = set_default_GRASS[3],
     #                                  quiet =quiet)  
-    #    grass_version = set_default_GRASS7[2]
-    #    installation_type = set_default_GRASS7[3]
+    #    grass_version = set_default_GRASS[2]
+    #    installation_type = set_default_GRASS[3]
     #    params_GRASS<- data.frame(instDir = gisbase_GRASS, 
     #                              version = grass_version, 
     #                              installation_type = installation_type,
@@ -361,7 +361,7 @@ searchGRASSW <- function(DL = "C:",
 searchGRASSX <- function(MP = "/usr/bin",quiet =TRUE){
   if (MP=="default") MP <- "/usr/bin"
   raw_GRASS <- system2("find", paste(MP," ! -readable -prune -o -type f -executable -iname 'grass??' -print"),stdout = TRUE,stderr = FALSE)
-  
+  if (length(raw_GRASS) == 0) raw_GRASS <- system2("find", paste(MP," ! -readable -prune -o -type f -executable -iname 'grass' -print"),stdout = TRUE,stderr = FALSE)
   
   #cat(raw_GRASS)
   if (length(raw_GRASS) > 0 ) {
@@ -370,7 +370,7 @@ searchGRASSX <- function(MP = "/usr/bin",quiet =TRUE){
     installations_GRASS <- lapply(seq(length(raw_GRASS)), function(i){
       # grep line containing GISBASE and extract the substring 
       rg<- strsplit(raw_GRASS,split = "/")
-      if (rg[[i]][lengths(rg)] == "grass78") {
+      if (rg[[i]][lengths(rg)] == "grass78" | rg[[i]][lengths(rg)] == "grass" ) {
       
 
       
@@ -384,7 +384,7 @@ searchGRASSX <- function(MP = "/usr/bin",quiet =TRUE){
       
       if (!file.exists(root_dir)) root_dir  <-  "/opt/grass"
     }
-      if (rg[[i]][lengths(rg)] != "grass78") {
+      else  {
         
         root_dir <- try(grep(readLines(raw_GRASS[[i]]),pattern = 'gisbase = "',value = TRUE),silent = TRUE)
         if(!class(root_dir)[1] == "try-error" ) {
@@ -417,7 +417,7 @@ searchGRASSX <- function(MP = "/usr/bin",quiet =TRUE){
 
 #'@title Usually for internally usage, create valid 'GRASS GIS 7.xx' rsession environment settings according to the selected GRASS GIS 7.x and Windows Version
 #'@name setenvGRASSw
-#'@description  Initializes and set up  access to 'GRASS GIS 7.xx' via the \code{rgrass7} wrapper or command line packages. Set and returns all necessary environment variables and additionally returns the GISBASE directory as string.
+#'@description  Initializes and set up  access to 'GRASS GIS 7.xx' via the \code{rgrass} wrapper or command line packages. Set and returns all necessary environment variables and additionally returns the GISBASE directory as string.
 #'@param root_GRASS  grass root directory i.e. "C:\\OSGEO4~1",
 #'@param grass_version grass version name i.e. "grass-7.0.5"
 #'@param installation_type two options "osgeo4w" as installed by the 'OSGeo4W'-installer and "NSIS" that is typical for a stand_alone installtion of 'GRASS GIS'.
@@ -531,9 +531,9 @@ setenvGRASSw <- function(root_GRASS=NULL,
 
 checkGisdbase <- function(x = NULL , gisdbase = NULL, location = NULL, gisdbase_exist = FALSE, obj_name = NULL ) {
   if (gisdbase_exist)
-    linkGRASS7(gisdbase = gisdbase, location = location, gisdbase_exist = TRUE)  
+    linkGRASS(gisdbase = gisdbase, location = location, gisdbase_exist = TRUE)  
   else 
-    linkGRASS7(x, gisdbase = gisdbase, location = location)  
+    linkGRASS(x, gisdbase = gisdbase, location = location)  
   path <- Sys.getenv("GISDBASE")
   sq_name <- gsub(tolower(paste0(obj_name,".sqlite")),pattern = "\\-",replacement = "_")
   return(list(gisbase_path = path, sqlite = sq_name))
