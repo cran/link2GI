@@ -13,9 +13,7 @@
 #    setwd(path_run)
 #  
 #  # get some typical authority generated data
-#    url<-"https://www.zensus2011.de/SharedDocs/Downloads/DE/Pressemitteilung/
-#          DemografischeGrunddaten/csv_Bevoelkerung_100m_Gitter.zip;
-#          jsessionid=294313DDBB57914D6636DE373897A3F2.2_cid389?__blob=publicationFile&v=3"
+#    url<-"https://www.zensus2011.de/SharedDocs/Downloads/DE/Pressemitteilung/DemografischeGrunddaten/csv_Bevoelkerung_100m_Gitter.zip;jsessionid=294313DDBB57914D6636DE373897A3F2.2_cid389?__blob=publicationFile&v=3"
 #   res <- curl::curl_download(url, paste0(path_run,"testdata.zip"))
 #  
 #  # unzip it
@@ -25,8 +23,6 @@
 #  
 
 ## ---- eval=FALSE--------------------------------------------------------------
-#  # get the filename
-#  
 #  # fast read with data.table
 #   xyz <- data.table::fread(paste0(path_run,"/Zensus_Bevoelkerung_100m-Gitter.csv"))
 #  
@@ -34,7 +30,7 @@
 
 ## ---- eval=FALSE--------------------------------------------------------------
 #   require(RColorBrewer)
-#   require(raster)
+#   require(terra)
 #   require(mapview)
 #  
 #  
@@ -42,8 +38,8 @@
 #   xyz <- xyz[,-1]
 #  
 #  # rasterize it according to the projection
-#   r <- raster::rasterFromXYZ(xyz,crs = sp::CRS("+init=epsg:3035"))
-#  
+#    r <- terra::rast(xyz, type="xyz")
+#   terra::crs(r) <- 3035
 #  
 #  # map it
 #   p <- colorRampPalette(brewer.pal(8, "Reds"))
@@ -67,8 +63,8 @@
 #  require(rgrass)
 #  
 #  # write it to geotiff
-#    raster::writeRaster(r, paste0(path_run,"/Zensus_Bevoelkerung_100m-Gitter.tif"),
-#                        overwrite = TRUE)
+#    terra::writeRaster(r, paste0(path_run,"/Zensus_Bevoelkerung_100m-Gitter.tif"),
+#         x               overwrite = TRUE)
 #  
 #  # import raster to GRASS
 #  rgrass::execGRASS('r.external',

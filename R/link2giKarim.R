@@ -1,5 +1,5 @@
 
-#'@title Checks if x is of type raster,sf or sp
+#'@title Checks if x is of type raster,terra,sf or sp
 #'@name getSpatialClass
 #'@description  Checks if x is a raster or sp object
 #'@param obj R raster* or sp object
@@ -14,8 +14,9 @@
 getSpatialClass <- function(obj) {
   if (class(obj)[1] %in% c("RasterLayer", "RasterStack",
                            "RasterBrick", "Satellite",
-                           "SpatialGridDataFrame",
-                           "SpatialPixelsDataFrame")) {"rst"} 
+                           "SpatialGridDataFrame","stars",
+                           "SpatialPixelsDataFrame",
+                           "SpatRaster")) {"rst"} 
   else if (class(obj)[1] %in% c("SpatialPointsDataFrame", "SpatialPoints",
                                 "SpatialPolygonsDataFrame",
                                 "SpatialPolygons",
@@ -167,9 +168,10 @@ if ( !isGeneric("sf2gvec") ) {
     standardGeneric("sf2gvec"))
 }
 
-#' Write sf object to GRASS 7/8 vector utilising an existing or creating a new GRASS environment
+#' Write sf object directly to `GRASS` vector utilising an existing or creating a new GRASS environment
 #' @param x  \code{sf} object corresponding to the settings of the corresponding GRASS container
 #' @param obj_name name of GRASS layer
+#' @param epsg numeric epsg code
 #' @param gisdbase  GRASS gisDbase folder
 #' @param location  GRASS location name containing \code{obj_name)}
 #' @param gisdbase_exist logical switch if the GRASS gisdbase folder exist default is TRUE
@@ -181,26 +183,35 @@ if ( !isGeneric("sf2gvec") ) {
 #' @importFrom sf st_read 
 
 #' @examples 
-#'\dontrun{
+#' 
+#' run = FALSE
+#' if (run) {
 #' ## example 
-#' # get meuse data as sf object
 #' require(sf)
-#' nc <- st_read(system.file("shape/nc.shp", package="sf"))
-#'     
+#' require(sp)
+#' require(link2GI)
+#' data(meuse)
+#' meuse_sf = st_as_sf(meuse, 
+#'                     coords = c("x", "y"), 
+#'                     crs = 28992, 
+#'                     agr = "constant")
+#' 
+#' 
 #' # write data to GRASS and create gisdbase
-#' sf2gvec(x = nc,
-#'           obj_name = "nc_R-G",
-#'           gisdbase = "~/temp3",
-#'           location = "project1")
-#'  
+#' sf2gvec(x = meuse_sf,
+#'         obj_name = "meuse_R-G",
+#'         gisdbase = "~/temp3/",
+#'         location = "project1")
+#' 
 #' # read from existing GRASS          
-#' gvec2sf(x = nc_R-G,
-#'           obj_name = "nc_R-G",
-#'           gisdbase = "~/temp3",
-#'           location = "project1")
+#' gvec2sf(x = meuse_sf,
+#'         obj_name = "meuse_r_g",
+#'         gisdbase = "~/temp3",       
+#'         location = "project1")
+#' 
 #' }
 
-sf2gvec <- function(x, obj_name, gisdbase, location , gisdbase_exist=FALSE){
+sf2gvec <- function(x, epsg, obj_name, gisdbase, location , gisdbase_exist=FALSE){
   
   if (gisdbase_exist)
     linkGRASS(gisdbase = gisdbase, location = location, gisdbase_exist = TRUE)  
@@ -211,17 +222,23 @@ sf2gvec <- function(x, obj_name, gisdbase, location , gisdbase_exist=FALSE){
   if (!inherits(x, "sf")) sf::st_as_sf(x,x_sf)
   else
     x_sf <- x 
-  sf::st_write(x_sf,file.path(path,sq_name),quiet = TRUE)
+  #if (!file.exists(file.path(path,sq_name)))
+  sf::st_write(x_sf,file.path(path,sq_name),append = FALSE)
+  
+  epsg = sf::st_crs(x)$epsg
   
   ret <- try(rgrass::execGRASS('v.import',  
-                                flags  = c("overwrite", "quiet", "o"),
-                                extent = "region",
+                                flags  = c("overwrite", "o"),
+                                #extent = "region",
                                 input  = file.path(path,sq_name),
+                               epsg = as.numeric(epsg),
                                 
                                 
-                                output = gsub(tolower(sq_name),pattern = "\\.",replacement = "_"),
-                                ignore.stderr = TRUE,
-                                intern = TRUE),silent = TRUE)
+                                output = gsub(tolower(sq_name),
+                                              pattern = "\\.",
+                                              replacement = ""),
+                               ignore.stderr = TRUE,
+                                intern = TRUE),silent = FALSE)
   
   if (methods::is(ret, "try-error"))  return(cat("Data not found"))
 }
@@ -231,7 +248,7 @@ if ( !isGeneric("gvec2sf") ) {
     standardGeneric("gvec2sf"))
 }
 
-#' Converts from an existing GRASS 7/8 environment an arbitrary vector dataset  into a  sf object
+#' Converts from an existing `GRASS` environment an arbitrary vector dataset  into a  sf object
 #' @param x  \code{\link{sf}} object corresponding to the settings of the corresponding GRASS container
 #' @param obj_name name of GRASS layer
 #' @param gisdbase  GRASS gisDbase folder
@@ -240,28 +257,34 @@ if ( !isGeneric("gvec2sf") ) {
 #' @author Chris Reudenbach
 #' @note  have a look at the \code{\link{sf}} capabilities to read direct from sqlite
 #' @export gvec2sf
+#' 
 #' @examples 
-#'\dontrun{
+#' 
+#' run = FALSE
+#' if (run) {
 #' ## example 
-#' # get meuse data as sf object
 #' require(sf)
+#' require(sp)
+#' require(link2GI)
+#' data(meuse)
 #' meuse_sf = st_as_sf(meuse, 
-#'                    coords = c("x", "y"), 
-#'                    crs = 28992, 
-#'                    agr = "constant")
-#'     
+#'                     coords = c("x", "y"), 
+#'                     crs = 28992, 
+#'                     agr = "constant")
+#' 
 #' 
 #' # write data to GRASS and create gisdbase
 #' sf2gvec(x = meuse_sf,
-#'           obj_name = "meuse_R-G",
-#'           gisdbase = "~/temp3",
-#'           location = "project1")
-#'  
+#'         obj_name = "meuse_R-G",
+#'         gisdbase = "~/temp3/",
+#'         location = "project1")
+#' 
 #' # read from existing GRASS          
 #' gvec2sf(x = meuse_sf,
-#'           obj_name = "meuse_R-G",
-#'           gisdbase = "~/temp3",
-#'           location = "project1")
+#'         obj_name = "meuse_r_g",
+#'         gisdbase = "~/temp3",       
+#'         location = "project1")
+#' 
 #' }
 
 gvec2sf <- function(x, obj_name, gisdbase, location ,gisdbase_exist = TRUE){
@@ -276,7 +299,7 @@ gvec2sf <- function(x, obj_name, gisdbase, location ,gisdbase_exist = TRUE){
   
   ret <- try(rgrass::execGRASS('v.out.ogr',  
                                 flags = c("overwrite","quiet"),
-                                input = gsub(tolower(sq_name),pattern = "\\.",replacement = "_"),
+                                input = gsub(tolower(sq_name),pattern = "\\.",replacement = ""),
                                 output = file.path(path,paste0(obj_name,"_new.sqlite")),
                                 format = "SQLite",
                                 ignore.stderr = TRUE,
@@ -293,7 +316,7 @@ gvec2sf <- function(x, obj_name, gisdbase, location ,gisdbase_exist = TRUE){
 #'
 #' @note You may also use the full list of arguments that is made available from the \code{link2GI} package, but it is strongly recommended in this case to use directly the single linkage functions from  \code{link2GI}.
 #' @param links character. links
-#' @param linkItems character. list of c("saga","grass7","otb","gdal")
+#' @param linkItems character. list of c("saga","grass","otb","gdal")
 #' @param simple logical. true  make all
 #' @param sagaArgs character. full string of sagaArgs
 #' @param grassArgs character. grassArgs full string of grassArgs
@@ -304,21 +327,20 @@ gvec2sf <- function(x, obj_name, gisdbase, location ,gisdbase_exist = TRUE){
 #'@examples
 #'\dontrun{
 #' # required packages
-#' require(uavRst)
 #' require(link2GI)
 #'
 #' # search, find and create the links to all supported  GI software
-#' giLinks<-uavRst::linkAll()
+#' giLinks<-linkAll()
 #' 
 #' # makes the GDAL linkage verbose
-#' giLinks<-uavRst::linkAll(gdalArgs= "quiet = TRUE") 
+#' giLinks<-linkAll(gdalArgs= "quiet = TRUE") 
 #'
 #'}
 
 #' @export
 linkAll <- function(links=NULL,
                     simple = TRUE,
-                    linkItems = c("saga","grass7","otb","gdal"),
+                    linkItems = c("saga","grass","otb","gdal"),
                     sagaArgs = "default",
                     grassArgs = "default",
                     otbArgs =   "default",

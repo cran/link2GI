@@ -4,16 +4,24 @@
 \alias{runOTB}
 \title{Execute the OTB command list via system call}
 \usage{
-runOTB(otbCmdList = NULL, gili = NULL, retRaster = TRUE, quiet = TRUE)
+runOTB(
+  otbCmdList = NULL,
+  gili = NULL,
+  retRaster = TRUE,
+  retCommand = FALSE,
+  quiet = TRUE
+)
 }
 \arguments{
 \item{otbCmdList}{the OTB algorithm parameter list}
 
-\item{gili}{optional gis linkage as done by `linkOTB()`}
+\item{gili}{optional list providing the linkage to OTB as done by `linkOTB()`. If not provided the `runOTB` function try to link automatically.}
 
-\item{retRaster}{boolean if TRUE a raster stack is returned}
+\item{retRaster}{boolean if TRUE a raster stack is returned default is FALSE}
 
-\item{quiet}{boolean  switch for suppressing messages default is TRUE}
+\item{retCommand}{boolean if TRUE only the OTB API command is returned default is FALSE}
+
+\item{quiet}{boolean  if TRUE suppressing messages default is TRUE}
 }
 \description{
 Wrapper function which paste the OTB command list into a system call compatible string and execute this command.
@@ -24,9 +32,8 @@ Wrapper function which paste the OTB command list into a system call compatible 
 \examples{
 \dontrun{
 require(link2GI)
-require(raster)
+require(terra)
 require(listviewer)
-rgdal::set_thin_PROJ6_warnings(TRUE)
 
 ## link to OTB
 otblink<-link2GI::linkOTB()
@@ -34,10 +41,9 @@ otblink<-link2GI::linkOTB()
 if (otblink$exist) {
  projRootDir<-tempdir()
  data('rgb', package = 'link2GI')  
- raster::plotRGB(rgb)
- r<-raster::writeRaster(rgb, 
+ terra::plotRGB(rgb)
+ r<-terra::writeRaster(rgb, 
                         filename=file.path(projRootDir,"test.tif"),
-                        format="GTiff", 
                         overwrite=TRUE)
 
 ## for an image output example we use the Statistic Extraction, 
@@ -58,8 +64,8 @@ cmd$radius <- 7
 ## run algorithm
 retStack<-runOTB(cmd,gili = otblink)
 
-## plot raster
-raster::plot(retStack)
+## plot image
+terra::plot(retStack)
 
 ## for a data output example we use the 
 
@@ -74,7 +80,7 @@ listviewer::jsonedit(cmd$help)
 ## define the mandatory arguments all other will be default
 cmd$input_il  <- file.path(tempdir(),"test.tif")
 cmd$ram <- 4096
-cmd$out <- file.path(tempdir(),"test_otb_stat.xml")
+cmd$out.xml <- file.path(tempdir(),"test_otb_stat.xml")
 cmd$progress <- 1
 
 ## run algorithm

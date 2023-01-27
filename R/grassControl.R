@@ -9,8 +9,10 @@
 #'@param ver_select if TRUE you must interactivley selcect between alternative installations
 #'@export paramGRASSx
 #'
-#'@examples
-#' \dontrun{
+#' @examples
+#' 
+#' run = FALSE
+#' if (run) {
 #' # automatic retrieval of the GRASS7 enviroment settings
 #' paramGRASSx()
 #' 
@@ -92,10 +94,10 @@ paramGRASSx <- function(set_default_GRASS=NULL,
 #'@description Initialize the enviroment variables on a 'Windows' OS for using 
 #'  'GRASS GIS' via \code{rgrass}
 #'@details The concept is very straightforward but for an all days usage pretty
-#'  helpful. You need to provide a \code{raster} or a \code{sp} object. The derived properties are used to initialize a temporary but static
+#'  helpful. You need to provide a \code{terra} or a \code{sf} object. The derived properties are used to initialize a temporary but static
 #'  \href{https://CRAN.R-project.org/package=rgrass}{rgrass} environment. During the rsession you will have full access to
 #'  GRASS7 both via the wrapper package as well as the command line. paramGRASSw initializes the usage of GRASS7.
-#'@param DL raster or sp object
+#'@param DL character search location default = \code{C:}
 #'@param ver_select boolean default is FALSE. If there is more than one 'SAGA GIS' installation and \code{ver_select} = TRUE the user can select interactively the preferred 'SAGA GIS' version 
 #'@param set_default_GRASS default = NULL forces a full search for 'GRASS GIS' binaries. You may
 #'  alternatively provide a vector containing pathes and keywords. c("C:/OSGeo4W64","grass-7.0.5","osgeo4w") is valid for a typical osgeo4w installation.
@@ -103,8 +105,10 @@ paramGRASSx <- function(set_default_GRASS=NULL,
 #'@param quiet boolean  switch for supressing console messages default is TRUE
 #'@export paramGRASSw
 #'  
-#'@examples
-#' \dontrun{ 
+#' @examples
+#' 
+#' run = FALSE
+#' if (run) {
 #' # automatic retrieval of valid 'GRASS GIS' environment settings 
 #' # if more than one is found the user has to choose.
 #' paramGRASSw()

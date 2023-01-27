@@ -75,11 +75,18 @@ parseOTBFunction <- function(algo=NULL,gili=NULL) {
   
   if (algo != "" & otb$exist){
     system("rm otb_module_dump.txt",intern = FALSE,ignore.stderr = TRUE)
-    ifelse(Sys.info()["sysname"]=="Windows",
-           system(paste0(file.path(R.utils::getAbsolutePath(utils::shortPathName(path_OTB)),paste0("otbcli_",algo))," -help >> " ,file.path(R.utils::getAbsolutePath(tempdir()),paste0("otb_module_dump.txt 2>&1")))), 
-           system(paste0(file.path(R.utils::getAbsolutePath(path_OTB),paste0("otbcli_",algo))," -help >> " ,file.path(R.utils::getAbsolutePath(tempdir()),paste0("otb_module_dump.txt 2>&1"))))
-           )
-    
+    if (!identical(grep(path_OTB,pattern = "OTB-8."), integer(0) )){
+      system(file.path(dirname(path_OTB[[1]]),"otbenv.profile")) 
+      system(paste0("otbcli_",algo," -help >> " ,file.path(R.utils::getAbsolutePath(tempdir()),paste0("otb_module_dump.txt 2>&1")))) 
+    } else {
+      
+      ifelse(Sys.info()["sysname"]=="Windows",
+             system(paste0("env -i ", path_OTB, "otbcli ", algo, " -help >> ", file.path(R.utils::getAbsolutePath(tempdir()), paste0("otb_module_dump.txt 2>&1")))),
+             #system(paste0(file.path(R.utils::getAbsolutePath(utils::shortPathName(path_OTB)),paste0("otbcli_",algo))," -help >> " ,file.path(R.utils::getAbsolutePath(tempdir()),paste0("otb_module_dump.txt 2>&1")))), 
+             #system(paste0("env -i ", path_OTB, "otbcli ", algo, " -help >> ", file.path(R.utils::getAbsolutePath(tempdir()), paste0("otb_module_dump.txt 2>&1"))))
+             system(paste0(file.path(R.utils::getAbsolutePath(path_OTB),paste0("otbcli_",algo))," -help >> " ,file.path(R.utils::getAbsolutePath(tempdir()),paste0("otb_module_dump.txt 2>&1"))))
+      )}
+    system(paste0("env -i ", path_OTB, "otbcli ", algo, " -help >> ", file.path(R.utils::getAbsolutePath(tempdir()), paste0("otb_module_dump.txt 2>&1"))))
     txt <-readLines(file.path(tempdir(),"otb_module_dump.txt"))
     file.remove(file.path(tempdir(),"otb_module_dump.txt"))
     # Pull out the appropriate line
@@ -153,8 +160,8 @@ parseOTBFunction <- function(algo=NULL,gili=NULL) {
   t[[1]]<-NULL
   helpList<-list()
   for (arg in names(t)){
-#    if (arg =="input_in")  arg<-"in"
-#    if (arg =="input_il")  arg<-"il"
+    #    if (arg =="input_in")  arg<-"in"
+    #    if (arg =="input_il")  arg<-"il"
     if (arg != "progress")  {
       system(paste0(path_OTB,"otbcli_",paste0(algo," -help ",arg ,paste0(" >> ",file.path(tempdir(),ocmd[[1]]),"-",arg,".txt 2>&1"))))
       helpList[[arg]]<-unique(readLines(paste0(file.path(tempdir(),ocmd[[1]]),"-",arg,".txt")))
@@ -173,16 +180,16 @@ parseOTBFunction <- function(algo=NULL,gili=NULL) {
 #' Execute the OTB command list via system call
 #'@description Wrapper function which paste the OTB command list into a system call compatible string and execute this command. 
 #'@param otbCmdList the OTB algorithm parameter list
-#'@param gili optional gis linkage as done by `linkOTB()`
-#'@param quiet boolean  switch for suppressing messages default is TRUE
-#'@param retRaster boolean if TRUE a raster stack is returned
+#'@param gili optional list providing the linkage to OTB as done by `linkOTB()`. If not provided the `runOTB` function try to link automatically.
+#'@param quiet boolean  if TRUE suppressing messages default is TRUE
+#'@param retRaster boolean if TRUE a raster stack is returned default is FALSE
+#'@param retCommand boolean if TRUE only the OTB API command is returned default is FALSE
 #'@details #' Please NOTE: You must check the help to identify the correct input file argument codewort ($input_in or $input_il). 
 #'@examples
 #'\dontrun{
 #' require(link2GI)
-#' require(raster)
+#' require(terra)
 #' require(listviewer)
-#' rgdal::set_thin_PROJ6_warnings(TRUE)
 #' 
 #' ## link to OTB
 #' otblink<-link2GI::linkOTB()
@@ -190,10 +197,9 @@ parseOTBFunction <- function(algo=NULL,gili=NULL) {
 #' if (otblink$exist) {
 #'  projRootDir<-tempdir()
 #'  data('rgb', package = 'link2GI')  
-#'  raster::plotRGB(rgb)
-#'  r<-raster::writeRaster(rgb, 
+#'  terra::plotRGB(rgb)
+#'  r<-terra::writeRaster(rgb, 
 #'                         filename=file.path(projRootDir,"test.tif"),
-#'                         format="GTiff", 
 #'                         overwrite=TRUE)
 #' 
 #' ## for an image output example we use the Statistic Extraction, 
@@ -214,8 +220,8 @@ parseOTBFunction <- function(algo=NULL,gili=NULL) {
 #' ## run algorithm
 #' retStack<-runOTB(cmd,gili = otblink)
 #' 
-#' ## plot raster
-#' raster::plot(retStack)
+#' ## plot image
+#' terra::plot(retStack)
 #' 
 #' ## for a data output example we use the 
 #' 
@@ -230,7 +236,7 @@ parseOTBFunction <- function(algo=NULL,gili=NULL) {
 #' ## define the mandatory arguments all other will be default
 #' cmd$input_il  <- file.path(tempdir(),"test.tif")
 #' cmd$ram <- 4096
-#' cmd$out <- file.path(tempdir(),"test_otb_stat.xml")
+#' cmd$out.xml <- file.path(tempdir(),"test_otb_stat.xml")
 #' cmd$progress <- 1
 #' 
 #' ## run algorithm
@@ -249,6 +255,7 @@ parseOTBFunction <- function(algo=NULL,gili=NULL) {
 runOTB <- function(otbCmdList=NULL,
                    gili=NULL,
                    retRaster=TRUE,
+                   retCommand=FALSE,
                    quiet = TRUE){
   
   if (is.null(gili)) {
@@ -273,48 +280,80 @@ runOTB <- function(otbCmdList=NULL,
   else if (names(otbCmdList)[1] == "io.il")  {
     otbCmdList$io.il <- gsub(" ", "\\/ ", R.utils::getAbsolutePath(otbCmdList$io.il))
   }
+  if(otbCmdList$mode == "vector"){
+    outn = otbCmdList$mode.vector.out
+  }
   
-  if(!is.null(otbCmdList$out)){
+  if(!is.null(otbCmdList$out.xml)){
+    otbCmdList$out.xml <-gsub(" ", "\\/ ", R.utils::getAbsolutePath(otbCmdList$out.xml))  
+    outn = otbCmdList$out.xml
+  } 
+  else if(!is.null(otbCmdList$out)){
     otbCmdList$out <-gsub(" ", "\\/ ", R.utils::getAbsolutePath(otbCmdList$out))  
     outn = otbCmdList$out
-  } else {
+  }else if (!is.null(otbCmdList$io.out)) {
     otbCmdList$io.out <-gsub(" ", "\\/ ", R.utils::getAbsolutePath(otbCmdList$io.out))
     outn = otbCmdList$io.out
+    # xml2::read_xml(outn)
   }
   
-  command<-paste(paste0(path_OTB,"otbcli_",otb_algorithm," "),
-                 paste0("-",names(otbCmdList)," ",otbCmdList,collapse = " "))
   
+  if (!identical(grep(path_OTB,pattern = "OTB-8."), integer(0) )){
+    command<-paste(paste0("otbcli_",otb_algorithm," "),
+                   paste0("-",names(otbCmdList)," ",otbCmdList,collapse = " "))
+    
+  } else {
+    command<-paste(paste0(path_OTB,"otbcli_",otb_algorithm," "),
+                   paste0("-",names(otbCmdList)," ",otbCmdList,collapse = " "))
+  }
   command = gsub("\\\\", "/", command)
-  
-  if (quiet){
-    system(command,ignore.stdout = TRUE,ignore.stderr = TRUE,intern = FALSE)
-    if (retRaster ){
-      #outn=gsub("\\/", "", path.expand(otbCmdList$out))
-      if (length(grep("xml", outn)) == 0) {
-        rStack <- assign(tools::file_path_sans_ext(basename(outn)),raster::stack(outn))
-        return(rStack)}
-      else {
+  if (retCommand)
+    return(command)
+  else {
+    if (quiet){
+      if (!identical(grep(path_OTB,pattern = "OTB-8."), integer(0) ))
+        system(file.path(dirname(path_OTB),"otbenv.profile")) 
+      
+      
+      res = system(command,ignore.stdout =TRUE,ignore.stderr = TRUE,intern = FALSE)
+      if (retRaster){
+        #outn=gsub("\\/", "", path.expand(otbCmdList$out))
+        if (length(grep("xml", outn)) == 0 & otbCmdList$mode != "vector") {
+          rStack <- assign(tools::file_path_sans_ext(basename(outn)),terra::rast(outn))
+          return(rStack)}
         
-        #warning("NOTE: ", outn," is not a raster\n")
-        return(readLines(outn)) 
+        
+        else if (length(grep("xml", outn)) > 0 & otbCmdList$mode != "vector"){
+          #warning("NOTE: ", outn," is not a raster\n")
+          return(xml2::read_xml(outn)) 
+        } else if ( otbCmdList$mode == "vector"){
+          
+          return(sf::st_read(outn)) 
+        }
       }
     }
-  }
-  else {
-    ret=system(command,ignore.stdout = FALSE,ignore.stderr = FALSE,intern = TRUE)
-    lapply(ret, print)
-    message(command)
-    if (retRaster){
-      #outn=gsub("\\/", "", path.expand(otbCmdList$out))
-      if (length(grep("xml", outn)) == 0) {
-        rStack <- assign(tools::file_path_sans_ext(basename(outn)),raster::stack(outn))
-        return(rStack)}
-      else {
-        #warning("NOTE: ", outn," is not a raster\n")
-        return(data=readLines(outn))
-      }
+    else {
+      if (!identical(grep(path_OTB,pattern = "OTB-8."), integer(0) ))
+        system(file.path(dirname(path_OTB),"otbenv.profile"))
+      message(command)
+      ret=system(command,ignore.stdout = FALSE,ignore.stderr = FALSE,intern = TRUE)
+      lapply(ret, print)
       
+      if (retRaster){
+        #outn=gsub("\\/", "", path.expand(otbCmdList$out))
+        if (length(grep("xml", outn)) == 0 & otbCmdList$mode != "vector") {
+          rStack <- assign(tools::file_path_sans_ext(basename(outn)),terra::rast(outn))
+          return(rStack)}
+        
+        
+        else if (length(grep("xml", outn)) > 0 & otbCmdList$mode != "vector"){
+          #warning("NOTE: ", outn," is not a raster\n")
+          return(xml2::read_xml(outn)) 
+        } else if ( otbCmdList$mode == "vector"){
+          
+          return(sf::st_read(outn)) 
+        }
+      }
     }
   }
 }

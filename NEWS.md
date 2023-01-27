@@ -1,3 +1,22 @@
+## link2GI 0.5-1
+## link2GI 0.5-2
+new feature:
+* add return of vector data in OTB calls
+
+bugfixes:
+* issue #58
+* minor fixes in runOTB
+
+bugfixes:
+* prelim fix of issue #57
+* fix of issue #56
+* minor fixes
+
+new feature:
+* integration of stars and terra raster objects for linking GRASS
+* update of documentation
+
+
 ## link2GI 0.5-0
 
 bugfixes:

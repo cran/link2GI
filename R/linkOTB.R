@@ -3,6 +3,7 @@ if (!isGeneric('linkOTB')) {
     standardGeneric('linkOTB'))
 }
 
+
 #'@title Locate and set up 'Orfeo ToolBox' API bindings
 #'@name linkOTB
 #'@description  Locate and set up  \href{https://www.orfeo-toolbox.org/}{'Orfeo ToolBox'} API bindings
@@ -45,7 +46,7 @@ linkOTB <- function(bin_OTB=NULL,
   if (Sys.info()["sysname"] == "Windows") {
      searchLocation<-"C:"
     } else 
-    {searchLocation<-"~"}
+    {searchLocation<-"/usr/bin/"}
     }
     params_OTB <- findOTB(searchLocation = searchLocation,quiet = quiet)
     # if just one valid installation was found take it

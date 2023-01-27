@@ -5,7 +5,7 @@
 [![License](https://img.shields.io/badge/license-GPL%20%28%3E=%203%29-lightgrey.svg?style=flat)](http://www.gnu.org/licenses/gpl-3.0.html)
 
 
-Package website: [release](https://r-spatial.github.io/link2GI/) | [dev](https://r-spatial.github.io/link2GI/dev/)
+Package website: [release](https://r-spatial.github.io/link2GI/)
 
 `link2GI` provide some functions which make it a bit easier to connect straightforward the common open source GI software packages to the R-biotop. It supports both the use of wrapper packages and the direct API-use via system calls. It focuses on `Linux` and `WindowsX` operating systems but nevertheless it should also work with `OSX`.
 
@@ -39,15 +39,15 @@ the OTB wrapper is updated for a more convinient usage. Please have a look at th
 
 ## link to OTB
 require(link2GI)
-require(raster)
+require(terra)
 require(listviewer)
 
 otblink<-link2GI::linkOTB()
 projRootDir<-tempdir()
 
 data('rgb', package = 'link2GI')  
-raster::plotRGB(rgb)
-r<-raster::writeRaster(rgb, 
+terra::plotRGB(rgb)
+r<-terra::writeRaster(rgb, 
                        filename=file.path(projRootDir,"test.tif"),
                        format="GTiff", overwrite=TRUE)
 ## for the example we use the edge detection, 

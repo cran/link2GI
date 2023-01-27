@@ -2,7 +2,7 @@
 % Please edit documentation in R/link2giKarim.R
 \name{gvec2sf}
 \alias{gvec2sf}
-\title{Converts from an existing GRASS 7/8 environment an arbitrary vector dataset  into a  sf object}
+\title{Converts from an existing `GRASS` environment an arbitrary vector dataset  into a  sf object}
 \usage{
 gvec2sf(x, obj_name, gisdbase, location, gisdbase_exist = TRUE)
 }
@@ -18,33 +18,38 @@ gvec2sf(x, obj_name, gisdbase, location, gisdbase_exist = TRUE)
 \item{gisdbase_exist}{logical switch if the GRASS gisdbase folder exist default is TRUE}
 }
 \description{
-Converts from an existing GRASS 7/8 environment an arbitrary vector dataset  into a  sf object
+Converts from an existing `GRASS` environment an arbitrary vector dataset  into a  sf object
 }
 \note{
 have a look at the \code{\link{sf}} capabilities to read direct from sqlite
 }
 \examples{
-\dontrun{
+
+run = FALSE
+if (run) {
 ## example 
-# get meuse data as sf object
 require(sf)
+require(sp)
+require(link2GI)
+data(meuse)
 meuse_sf = st_as_sf(meuse, 
-                   coords = c("x", "y"), 
-                   crs = 28992, 
-                   agr = "constant")
-    
+                    coords = c("x", "y"), 
+                    crs = 28992, 
+                    agr = "constant")
+
 
 # write data to GRASS and create gisdbase
 sf2gvec(x = meuse_sf,
-          obj_name = "meuse_R-G",
-          gisdbase = "~/temp3",
-          location = "project1")
- 
+        obj_name = "meuse_R-G",
+        gisdbase = "~/temp3/",
+        location = "project1")
+
 # read from existing GRASS          
 gvec2sf(x = meuse_sf,
-          obj_name = "meuse_R-G",
-          gisdbase = "~/temp3",
-          location = "project1")
+        obj_name = "meuse_r_g",
+        gisdbase = "~/temp3",       
+        location = "project1")
+
 }
 }
 \author{

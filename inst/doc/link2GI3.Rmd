@@ -26,9 +26,10 @@ A typical example is the usage of an already existing project database in `GRASS
 ## Creating a GRASS project
 
 ## Download Zensus Data
-First of all we need some real world data. In this this case the gridded German 2011 micro zensus data (see https://www.zensus2011.de/EN/Home/). Download the data:
+First of all we need some real world data. In this this case the gridded German 2011 micro zensus data. Download the data:
 
 ```sh
+# (https://www.zensus2011.de/EN/Service/Contact/contact_node.html)
 wget https://www.zensus2011.de/SharedDocs/Downloads/DE/Pressemitteilung/DemografischeGrunddaten/csv_Bevoelkerung_100m_Gitter.zip?__blob=publicationFile&v=3
 
 ```
@@ -56,9 +57,7 @@ We also have to download the meta data description file from the above website f
   setwd(path_run)
 
 # get some typical authority generated data 
-  url<-"https://www.zensus2011.de/SharedDocs/Downloads/DE/Pressemitteilung/
-        DemografischeGrunddaten/csv_Bevoelkerung_100m_Gitter.zip;
-        jsessionid=294313DDBB57914D6636DE373897A3F2.2_cid389?__blob=publicationFile&v=3"
+  url<-"https://www.zensus2011.de/SharedDocs/Downloads/DE/Pressemitteilung/DemografischeGrunddaten/csv_Bevoelkerung_100m_Gitter.zip;jsessionid=294313DDBB57914D6636DE373897A3F2.2_cid389?__blob=publicationFile&v=3"
  res <- curl::curl_download(url, paste0(path_run,"testdata.zip"))
 
 # unzip it
@@ -73,8 +72,6 @@ After downloading the data we will use it for some demonstration stuff. If you h
 
 
 ```{r, eval=FALSE}
-# get the filename
- 
 # fast read with data.table 
  xyz <- data.table::fread(paste0(path_run,"/Zensus_Bevoelkerung_100m-Gitter.csv"))
 
@@ -86,7 +83,7 @@ We can easy rasterize this data as it is intentionally gridded data.that means w
 
 ```{r, eval=FALSE}
  require(RColorBrewer)
- require(raster)
+ require(terra)
  require(mapview)
 
 
@@ -94,8 +91,8 @@ We can easy rasterize this data as it is intentionally gridded data.that means w
  xyz <- xyz[,-1]
 
 # rasterize it according to the projection 
- r <- raster::rasterFromXYZ(xyz,crs = sp::CRS("+init=epsg:3035"))
-
+  r <- terra::rast(xyz, type="xyz")
+ terra::crs(r) <- 3035
 
 # map it
  p <- colorRampPalette(brewer.pal(8, "Reds"))
@@ -122,9 +119,9 @@ link2GI::linkGRASS(x = r,
                     location = "microzensus2011")   
 ```
 
-Finally we can now import the data to the `GRASS` gisdbase using the `rgass7` package functionality. 
+Finally we can now import the data to the `GRASS` gisdbase using the `rgass` package functionality. 
 
-First we must convert the raster object to `GeoTIFF` file. Any `GDAL` format is possible but `GeoTIFF` is very common and stable.
+First we must convert the raster/terra object to a `GeoTIFF` file. Any `GDAL` format is possible but `GeoTIFF` is very common and stable.
 
 
 ```{r, eval=FALSE}
@@ -133,8 +130,8 @@ require(raster)
 require(rgrass)
 
 # write it to geotiff
-  raster::writeRaster(r, paste0(path_run,"/Zensus_Bevoelkerung_100m-Gitter.tif"), 
-                      overwrite = TRUE)
+  terra::writeRaster(r, paste0(path_run,"/Zensus_Bevoelkerung_100m-Gitter.tif"), 
+       x               overwrite = TRUE)
 
 # import raster to GRASS
 rgrass::execGRASS('r.external',
