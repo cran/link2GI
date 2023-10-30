@@ -196,11 +196,7 @@ parseOTBFunction <- function(algo=NULL,gili=NULL) {
 #' 
 #' if (otblink$exist) {
 #'  projRootDir<-tempdir()
-#'  data('rgb', package = 'link2GI')  
-#'  terra::plotRGB(rgb)
-#'  r<-terra::writeRaster(rgb, 
-#'                         filename=file.path(projRootDir,"test.tif"),
-#'                         overwrite=TRUE)
+#'  fn <- system.file("ex/elev.tif", package = "terra")
 #' 
 #' ## for an image output example we use the Statistic Extraction, 
 #' algoKeyword<- "LocalStatisticExtraction"
@@ -213,7 +209,7 @@ parseOTBFunction <- function(algo=NULL,gili=NULL) {
 #' listviewer::jsonedit(cmd$help)
 #' 
 #' ## define the mandatory arguments all other will be default
-#' cmd$input_in  <- file.path(tempdir(),"test.tif")
+#' cmd$input_in  <- fn
 #' cmd$out <- file.path(tempdir(),"test_otb_stat.tif")
 #' cmd$radius <- 7
 #' 
@@ -280,9 +276,11 @@ runOTB <- function(otbCmdList=NULL,
   else if (names(otbCmdList)[1] == "io.il")  {
     otbCmdList$io.il <- gsub(" ", "\\/ ", R.utils::getAbsolutePath(otbCmdList$io.il))
   }
-  if(otbCmdList$mode == "vector"){
+  
+  if (!is.null(otbCmdList$mode)) {
+     if (otbCmdList$mode == "vector"){
     outn = otbCmdList$mode.vector.out
-  }
+  }}
   
   if(!is.null(otbCmdList$out.xml)){
     otbCmdList$out.xml <-gsub(" ", "\\/ ", R.utils::getAbsolutePath(otbCmdList$out.xml))  
@@ -312,18 +310,18 @@ runOTB <- function(otbCmdList=NULL,
   else {
     if (quiet){
       if (!identical(grep(path_OTB,pattern = "OTB-8."), integer(0) ))
-        system(file.path(dirname(path_OTB),"otbenv.profile")) 
+        system(file.path(dirname(as.character(path_OTB)),"otbenv.profile")) 
       
       
       res = system(command,ignore.stdout =TRUE,ignore.stderr = TRUE,intern = FALSE)
       if (retRaster){
         #outn=gsub("\\/", "", path.expand(otbCmdList$out))
-        if (length(grep("xml", outn)) == 0 & otbCmdList$mode != "vector") {
+        if (xfun::file_ext(outn) =="tif") {
           rStack <- assign(tools::file_path_sans_ext(basename(outn)),terra::rast(outn))
           return(rStack)}
         
         
-        else if (length(grep("xml", outn)) > 0 & otbCmdList$mode != "vector"){
+        else if (xfun::file_ext(outn) =="xml") {
           #warning("NOTE: ", outn," is not a raster\n")
           return(xml2::read_xml(outn)) 
         } else if ( otbCmdList$mode == "vector"){
@@ -341,12 +339,12 @@ runOTB <- function(otbCmdList=NULL,
       
       if (retRaster){
         #outn=gsub("\\/", "", path.expand(otbCmdList$out))
-        if (length(grep("xml", outn)) == 0 & otbCmdList$mode != "vector") {
+        if (xfun::file_ext(outn) =="tif") {
           rStack <- assign(tools::file_path_sans_ext(basename(outn)),terra::rast(outn))
           return(rStack)}
         
         
-        else if (length(grep("xml", outn)) > 0 & otbCmdList$mode != "vector"){
+        else if (xfun::file_ext(outn) =="xml"){
           #warning("NOTE: ", outn," is not a raster\n")
           return(xml2::read_xml(outn)) 
         } else if ( otbCmdList$mode == "vector"){
