@@ -6,14 +6,14 @@
 \usage{
 paramGRASSw(
   set_default_GRASS = NULL,
-  DL = "C:",
+  DL = "C:/",
   ver_select = FALSE,
   quiet = TRUE
 )
 }
 \arguments{
 \item{set_default_GRASS}{default = NULL forces a full search for 'GRASS GIS' binaries. You may
-alternatively provide a vector containing pathes and keywords. c("C:/OSGeo4W64","grass-7.0.5","osgeo4w") is valid for a typical osgeo4w installation.}
+alternatively provide a vector containing paths and keywords. c('C:/OSGeo4W64','grass-7.0.5','osgeo4w') is valid for a typical osgeo4w installation.}
 
 \item{DL}{character search location default = \code{C:}}
 
@@ -29,7 +29,7 @@ Initialize the enviroment variables on a 'Windows' OS for using
 The concept is very straightforward but for an all days usage pretty
  helpful. You need to provide a \code{terra} or a \code{sf} object. The derived properties are used to initialize a temporary but static
  \href{https://CRAN.R-project.org/package=rgrass}{rgrass} environment. During the rsession you will have full access to
- GRASS7 both via the wrapper package as well as the command line. paramGRASSw initializes the usage of GRASS7.
+ GRASS both via the wrapper package as well as the command line. paramGRASSw initializes the usage of GRASS.
 }
 \examples{
 
@@ -40,6 +40,7 @@ if (run) {
 paramGRASSw()
 
 # typical OSGeo4W64 installation
-paramGRASSw(c("C:/OSGeo4W64","grass-7.0.5","osgeo4W"))
+paramGRASSw(c('C:/OSGeo4','grass7.8','osgeo4W'))
 }
 }
+\keyword{internal}

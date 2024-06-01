@@ -1,0 +1,33 @@
+#' Setup project environment
+#'
+#' @description This script configures the project environment.
+#'
+#' @author [name], [email@com]
+#'
+
+<% if (notes) { -%>
+# Use this file for general project settings.
+
+# This script is sourced when you run the main control script. Use variable dirs to access project directories.
+
+<% } %>
+require(link2GI)
+
+# Define libraries
+
+# Load libraries and create environment object to be used in other scripts for path navigation
+project_folders <- list.dirs(path = root_folder, full.names = FALSE, recursive = TRUE)
+project_folders <- project_folders[!grepl("\\..", project_folders)]
+dirs <- setupProj(
+  root_folder = root_folder, 
+  fcts_folder = file.path(root_folder, "src/functions/"),  
+  folders = project_folders,
+  libs = libs, 
+  create_folders = FALSE)
+
+
+# Define more variables
+
+# Load more data
+
+

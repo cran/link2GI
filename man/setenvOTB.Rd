@@ -13,7 +13,7 @@ setenvOTB(bin_OTB = NULL, root_OTB = NULL)
 containing the 'OTB' installation'}
 }
 \value{
-Adds 'OTB' pathes to the enviroment and creates the variable global string variable \code{otbCmd}, that contains the path to the 'OTB' binaries.
+Adds 'OTB' paths to the environment and creates the variable global string variable \code{otbCmd}, that contains the path to the 'OTB' binaries.
 }
 \description{
 Initializes and set up  access to the 'OTB' command line interface
@@ -21,7 +21,8 @@ Initializes and set up  access to the 'OTB' command line interface
 \examples{
 \dontrun{
 ## example for the most common default OSGeo4W64 installation of OTB
-setenvOTB(bin_OTB = "C:\\\\OSGeo4W64\\\\bin\\\\",
-          root_OTB = "C:\\\\OSGeo4W64")
+setenvOTB(bin_OTB = 'C:\\\\OSGeo4W64\\\\bin\\\\',
+          root_OTB = 'C:\\\\OSGeo4W64')
 }
 }
+\keyword{internal}

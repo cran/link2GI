@@ -9,10 +9,10 @@ searchGRASSX(MP = "/usr/bin", quiet = TRUE)
 \arguments{
 \item{MP}{default is /usr. This is the directory from which the grass executable file is searched, i.e. one executable for each GRASS installation on the system.}
 
-\item{quiet}{boolean  switch for supressing console messages default is TRUEs}
+\item{quiet}{boolean.  switch for suppressing console messages default is TRUE}
 }
 \value{
-A dataframe containing 'GRASS GIS' binary folder(s) (i.e. where the individual GRASS commands are installed), version name(s) and installation type code(s)
+data frame containing 'GRASS GIS' binary folder(s) (i.e. where the individual GRASS commands are installed), version name(s) and installation type code(s)
 }
 \description{
 Searches recursively for valid 'GRASS GIS' installations at a given 'Linux' mount point.
@@ -21,10 +21,10 @@ Returns attributes for each installation.
 \examples{
 \dontrun{
 # get all valid 'GRASS GIS' installation folders in the /usr/bin directory (typical location)
-searchGRASSX("/usr/bin")
+searchGRASSX('/usr/bin')
 
 # get all valid 'GRASS GIS' installation folders in the home directory
-searchGRASSX("~/")
+searchGRASSX('~/')
 }
 }
 \author{

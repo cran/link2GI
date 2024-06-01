@@ -2,39 +2,97 @@
 % Please edit documentation in R/initProj.R
 \name{initProj}
 \alias{initProj}
-\title{Defines and creates folders and variables}
+\title{Simple creation and reproduction of an efficient project environment}
 \usage{
 initProj(
-  projRootDir = tempdir(),
-  GRASSlocation = "tmp/",
-  projFolders = c("data/", "result/", "run/", "log/"),
-  path_prefix = "",
-  global = FALSE
+  root_folder = ".",
+  folders = NULL,
+  init_git = NULL,
+  init_renv = NULL,
+  code_subfolder = c("src", "src/functions", "src/configs"),
+  global = FALSE,
+  openproject = NULL,
+  newsession = TRUE,
+  standard_setup = "baseSpatial",
+  loc_name = NULL,
+  ymlFN = NULL,
+  appendlibs = NULL,
+  OpenFiles = NULL
 )
 }
 \arguments{
-\item{projRootDir}{project github root directory (your github name)}
+\item{root_folder}{root directory of the project.}
 
-\item{GRASSlocation}{folder for GRASS data}
+\item{folders}{list of sub folders within the project directory that will be created.}
 
-\item{projFolders}{list of subfolders in project}
+\item{init_git}{logical: init git repository in the project directory.}
 
-\item{path_prefix}{character a prefix for the path variables names default is ""}
+\item{init_renv}{logical: init renv in the project directory.}
 
-\item{global}{boolean esport path strings as global variables default is false}
+\item{code_subfolder}{sub folders for scripts and functions within the project directory that will be created. The
+folders src, src/functions and src/config are mandatory.}
+
+\item{global}{logical: export path strings as global variables?}
+
+\item{openproject}{default NULL if TRUE the project is opened in a new session}
+
+\item{newsession}{open project in a new session? default is FALSE}
+
+\item{standard_setup}{select one of the predefined settings c('base', 'baseSpatial', 'advancedSpatial'). 
+In this case, only the name of the base folder is required, but individual additional 
+folders can be specified under 'folders' 
+name of the git repository must be supplied to the function.}
+
+\item{loc_name}{NULL by default, defines the research area of the analysis in the data folder as a subfolder and serves as a code tag}
+
+\item{ymlFN}{filename for a yaml file containing a non standard_setup}
+
+\item{appendlibs}{vector with the  names of libraries that are required for the initial project.
+settings required for the project, such as additional libraries, optional settings, 
+colour schemes, etc. Important: It should not be used to control the runtime
+parameters of the scripts.  This file is not read in automatically, even if 
+it is located in the 'fcts_folder' folder.}
+
+\item{OpenFiles}{default NULL}
+}
+\value{
+dirs, i.e. a list containing the project paths.
 }
 \description{
-Defines and creates (if necessary) all folders variables. Returns a list with the project folder pathes. Optionally exports all pathes to a global sub environment.
+Set up the project environment with a defined folder structure, an RStudio project, initial scripts and configuration files and optionally with Git and Renv support.
+}
+\details{
+The function uses [setupProj] for setting up the folders. Once the project is creaeted, manage the overall
+configuration of the project by the `src/functions/000_settings.R script`. It is sourced at the begining of the
+template scripts that are created by default. Define additional constans, required libraries etc. in the
+000_settings.R at any time. If additonal folders are required later, just add them manually. They will be parsed as
+part of the 000_settings.R and added to a variable called dirs that allows easy acces to any of the folders. Use
+this variable to load/save data to avoid any hard coded links in the scripts except the top-level root folder which
+is defined once in the main control script located at src/main.R.
+}
+\note{
+For yaml based setup you need to use one of the default configurations 
+c('base', 'baseSpatial','advancedSpatial') or you provide a yaml file this 
+MUST contain the standard_setup arguments, where \code{ mysetup} is the yaml root, all other items are mandatory keywords that can be filled in as needed.  
+ \preformatted{
+mysetup:
+  dataFolder:  
+  docsFolder:  
+  tmpFolder:   
+  init_git: true/false 
+  init_renv: true/false 
+  code_subfolder: ['src', 'src/functions' , 'src/config'] 
+  global: true/false 
+  libs: 
+  create_folders: true/false
+  files:
+}
+   Alternatively you may set default_setup to NULL and provide the arguments via command line.
 }
 \examples{
 \dontrun{
+root_folder <- tempdir() # Mandatory, variable must be in the R environment.
+dirs <- initProj(root_folder = root_folder, standard_setup = 'baseSpatial')
+}
 
-link2GI::initProj(projRootDir = tempdir(),
-                 projFolders = c("data/",
-                                 "data/level0/",
-                                 "data/level1/",
-                                  "output/",
-                                  "run/",
-                                  "fun/") )
-}   
 }

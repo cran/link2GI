@@ -1,0 +1,33 @@
+Binding: initProj
+Title: Create Project structure (link2GI)
+OpenFiles: src/pre-processing.R, src/post-processing.R, src/10-processing.R , src/functions/000_setup.R , src/main-control.R
+
+Parameter: init_git
+Widget: CheckboxInput
+Label: Initialize git 
+Position: left
+
+Parameter: init_renv
+Widget: CheckboxInput
+Label: Initialize renv
+Position: left
+
+Parameter: standard_setup
+Widget: SelectInput
+Label:  configuration
+Fields: base, baseSpatial,advancedSpatial
+Position: left
+
+Parameter: appendlibs
+Widget: TextInput
+Label: load libraries
+Default:  dplyr
+Position: right
+
+Parameter: loc_name
+Widget: TextInput
+Label: location tag
+Default: 
+Position: right
+
+

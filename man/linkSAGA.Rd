@@ -16,14 +16,14 @@ linkSAGA(
 \item{default_SAGA}{string contains path to \code{RSAGA} binaries}
 
 \item{searchLocation}{drive letter to be searched, for Windows systems default
-is \code{C:}, for Linux systems default is \code{/usr}.}
+is \code{C:}, for Linux systems default is \code{/usr/bin}.}
 
 \item{ver_select}{boolean default is FALSE. If there is more than one 'SAGA GIS' installation and \code{ver_select} = TRUE the user can select interactively the preferred 'SAGA GIS' version}
 
 \item{quiet}{boolean  switch for supressing console messages default is TRUE}
 
-\item{returnPaths}{boolean if set to FALSE the pathes of the selected version are written 
-to the PATH variable only, otherwise all paths and versions of the installed SAGA versions ae returned.#'@details If called without any parameter \code{linkSAGA()} it performs a full search over \code{C:}. If it finds one or more 'SAGA GIS' binaries it will take the first hit. You have to set \code{ver_select = TRUE} for an interactive selection of the preferred version. Additionally the selected SAGA pathes are added to the environment and the global variables \code{sagaPath}, \code{sagaModPath} and \code{sagaCmd} will be created.}
+\item{returnPaths}{boolean if set to FALSE the paths of the selected version are written 
+to the PATH variable only, otherwise all paths and versions of the installed SAGA versions ae returned.#'@details If called without any parameter \code{linkSAGA()} it performs a full search over \code{C:}. If it finds one or more 'SAGA GIS' binaries it will take the first hit. You have to set \code{ver_select = TRUE} for an interactive selection of the preferred version. Additionally the selected SAGA paths are added to the environment and the global variables \code{sagaPath}, \code{sagaModPath} and \code{sagaCmd} will be created.}
 }
 \value{
 A list containing the selected \code{RSAGA} path variables \code{$sagaPath},\code{$sagaModPath},\code{$sagaCmd} and potentially other installations \code{$installed}
@@ -37,12 +37,12 @@ All existing installation(s) means that it looks for the \code{saga_cmd} or \cod
 executables. If the file is found it is assumed to be a valid 'SAGA GIS' installation. If it is called without any argument the most recent (i.e. highest) SAGA GIS version will be linked.
 }
 \note{
-The excellent 'SAGA GIS' wrapper \href{https://CRAN.R-project.org/package=RSAGA}{RSAGA} 
-package was updated several times however it covers currently (Dec 2019) only 'SAGA GIS' 
-versions from 2.3.1 - 6.3.0 The fast evolution of 'SAGA GIS' makes it highly impracticable
-to keep the wrapper adaptions in line (currently 7.5). \code{RSAGA} will meet all linking needs perfectly if 
+The 'SAGA GIS' wrapper \href{https://CRAN.R-project.org/package=RSAGA}{RSAGA} 
+package was updated several times however it covers currently (May 2014) only 'SAGA GIS' 
+versions from  2.3.1 LTS - 8.4.1 The fast evolution of 'SAGA GIS' makes it highly impracticable
+to keep the wrapper adaptions in line (currently 9.4). \code{RSAGA} will meet all linking needs perfectly if 
 you use 'SAGA GIS' versions from 2.0.4 - 7.5.0. \cr  However you must call \code{rsaga.env} using the \code{rsaga.env(modules = saga$sagaModPath)} assuming that \code{saga} contains the returnPaths of \code{linkSAGA} 
-In addition most recently  the very promising  \href{https://github.com/stevenpawley/Rsagacmd}{Rsagacmd} wrapper package is providing a new list oriented wrapping tool.
+In addition the very promising  \href{https://github.com/stevenpawley/Rsagacmd}{Rsagacmd} wrapper package is providing a new list oriented wrapping tool.
 }
 \examples{
 \dontrun{
